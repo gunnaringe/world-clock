@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <h2>Settings</h2>
+    <form id="settings-form">
+        <h3>Hour Format</h3>
+        <div class="form-group">
+            <select id="hour-format" name="hour-format" class="dropdown" style="height: 40px;">
+                <option value="12">12-hour</option>
+                <option value="24">24-hour</option>
+            </select>
+        </div>
+        <br>
+        <h3>Locations</h3>
+        <div id="locations-container">
+            <!-- Locations will be populated by JavaScript -->
+        </div>
+        <button type="button" id="add-location" class="add-button" style="height: 40px;">Add new</button>
+    </form>
+    <br><br>
+    <a href="index.html" class="pretty-link">Back to World Clock</a>
+    <script src="settings.js"></script>
+</body>
+</html>
