@@ -13,8 +13,8 @@
         <h2 class="header-blue">Settings</h2>
         <form>
             <div class="form-group row">
-                <label for="hour-format" class="col-sm-2 col-form-label">Hour Format:</label>
-                <div class="col-sm-10">
+                <label for="hour-format" class="col-sm-3 col-form-label">Hour Format:</label>
+                <div class="col-sm-9">
                     <select id="hour-format" class="form-control">
                         <option value="12">12-hour</option>
                         <option value="24">24-hour</option>
@@ -22,12 +22,12 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label for="screen-flash" class="col-sm-2 col-form-label">Prevent Screen Burnout:</label>
-                <div class="col-sm-8">
-                    <input type="checkbox" id="screen-flash" class="form-check-input">
-                </div>
-                <div class="col-sm-2">
-                    <button id="preview-flash" type="button" class="btn btn-primary">Preview Screen Flash</button>
+                <label for="screen-flash" class="col-sm-3 col-form-label">Prevent Screen Burnout:</label>
+                <div class="col-sm-9">
+                    <div class="form-check">
+                        <input type="checkbox" id="screen-flash" class="form-check-input">
+                        <button id="preview-flash" type="button" class="btn btn-primary ml-3">Preview</button>
+                    </div>
                 </div>
             </div>
         </form>

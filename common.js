@@ -6,14 +6,18 @@ function runFlashSequence() {
     flashOverlay.style.width = '100%';
     flashOverlay.style.height = '100%';
     flashOverlay.style.zIndex = '9999';
-    flashOverlay.style.backgroundColor = 'white';
     document.body.appendChild(flashOverlay);
 
-    setTimeout(() => {
-        flashOverlay.style.backgroundColor = 'black';
-    }, 500);
+    const colors = ['white', 'green', 'blue', 'red', 'black'];
+    let colorIndex = 0;
+
+    const intervalId = setInterval(() => {
+        flashOverlay.style.backgroundColor = colors[colorIndex];
+        colorIndex = (colorIndex + 1) % colors.length;
+    }, 100);
 
     setTimeout(() => {
+        clearInterval(intervalId);
         document.body.removeChild(flashOverlay);
     }, 1000);
 }
