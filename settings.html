@@ -6,24 +6,44 @@
     <title>Settings</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <h2 class="header-blue">Settings</h2>
-    <div class="form-group">
-        <label for="hour-format">Hour Format:</label>
-        <select id="hour-format" class="dropdown">
-            <option value="12">12-hour</option>
-            <option value="24">24-hour</option>
-        </select>
-    </div>
-    <div id="locations-container">
-        <!-- Location inputs will be populated by JavaScript -->
-    </div>
-    <button id="add-location" class="add-button">Add Location</button>
-    <div class="bottom-link">
-        <a href="index.html" class="pretty-link">Back to Clock</a>
+    <div class="container mt-5">
+        <h2 class="header-blue">Settings</h2>
+        <form>
+            <div class="form-group row">
+                <label for="hour-format" class="col-sm-2 col-form-label">Hour Format:</label>
+                <div class="col-sm-10">
+                    <select id="hour-format" class="form-control">
+                        <option value="12">12-hour</option>
+                        <option value="24">24-hour</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="screen-flash" class="col-sm-2 col-form-label">Prevent Screen Burnout:</label>
+                <div class="col-sm-8">
+                    <input type="checkbox" id="screen-flash" class="form-check-input">
+                </div>
+                <div class="col-sm-2">
+                    <button id="preview-flash" type="button" class="btn btn-primary">Preview Screen Flash</button>
+                </div>
+            </div>
+        </form>
+        <div id="locations-container" class="mt-4">
+            <!-- Location inputs will be populated by JavaScript -->
+        </div>
+        <button id="add-location" class="btn btn-secondary mt-3">Add Location</button>
+        <div class="bottom-link mt-4">
+            <a href="index.html" class="pretty-link">Back to Clock</a>
+        </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="common.js"></script>
     <script src="settings.js"></script>
 </body>
 </html>

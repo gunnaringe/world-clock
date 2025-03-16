@@ -106,4 +106,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     updateAll();
     setInterval(updateAll, 1000); // Update every second
+
+    // Run flash sequence every 30 minutes if the setting is enabled
+    if (JSON.parse(localStorage.getItem('screenFlash'))) {
+        setInterval(runFlashSequence, 1800000);
+    }
 });

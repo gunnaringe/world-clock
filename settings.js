@@ -1,9 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
     const hourFormatSelect = document.getElementById("hour-format");
     const locationsContainer = document.getElementById("locations-container");
+    const screenFlashCheckbox = document.getElementById("screen-flash");
+    const previewFlashButton = document.getElementById("preview-flash");
 
     // Load existing settings
     hourFormatSelect.value = localStorage.getItem('hourFormat') || '24';
+    screenFlashCheckbox.checked = JSON.parse(localStorage.getItem('screenFlash')) || false;
     const locations = JSON.parse(localStorage.getItem('locations')) || [];
     locations.forEach(location => addLocationInput(location.name, location.timeZone));
 
@@ -11,6 +14,16 @@ document.addEventListener("DOMContentLoaded", () => {
     hourFormatSelect.addEventListener("change", () => {
         localStorage.setItem('hourFormat', hourFormatSelect.value);
         updateTimeAndPlanner();
+    });
+
+    // Auto-save screen flash setting
+    screenFlashCheckbox.addEventListener("change", () => {
+        localStorage.setItem('screenFlash', screenFlashCheckbox.checked);
+    });
+
+    // Preview screen flash
+    previewFlashButton.addEventListener("click", () => {
+        runFlashSequence();
     });
 
     // Add new location input
