@@ -64,7 +64,16 @@ function setHourFormat(format) {
 }
 
 function getLocations() {
-    return JSON.parse(localStorage.getItem('locations')) || defaultLocations;
+    const locations = JSON.parse(localStorage.getItem('locations')) || defaultLocations;
+    return locations.filter(location => {
+        try {
+            new Intl.DateTimeFormat('en-US', { timeZone: location.timeZone }).format(new Date());
+            return true;
+        } catch (e) {
+            console.warn(`Invalid time zone: ${location.timeZone}`);
+            return false;
+        }
+    });
 }
 
 function setLocations(locations) {
@@ -89,7 +98,12 @@ function renderClocks() {
 
 document.addEventListener("DOMContentLoaded", () => {
     renderClocks();
-    updateTime();
-    populateMeetingPlanner();
-    setInterval(updateTime, 1000);
+
+    function updateAll() {
+        updateTime();
+        populateMeetingPlanner();
+    }
+
+    updateAll();
+    setInterval(updateAll, 1000); // Update every second
 });

@@ -27,18 +27,10 @@ document.addEventListener("DOMContentLoaded", () => {
         dragHandle.className = 'drag-handle';
         dragHandle.innerHTML = '⋮⋮';
 
-        const timeZoneSelect = document.createElement('select');
-        timeZoneSelect.className = 'location-timezone dropdown';
-        const timeZones = Intl.supportedValuesOf('timeZone');
-        timeZones.forEach(zone => {
-            const option = document.createElement('option');
-            option.value = zone;
-            option.text = zone;
-            if (zone === timeZone) {
-                option.selected = true;
-            }
-            timeZoneSelect.appendChild(option);
-        });
+        const timeZoneInput = document.createElement('input');
+        timeZoneInput.className = 'location-timezone';
+        timeZoneInput.placeholder = 'Search Timezone';
+        timeZoneInput.value = timeZone;
 
         const nameInput = document.createElement('input');
         nameInput.type = 'text';
@@ -46,8 +38,9 @@ document.addEventListener("DOMContentLoaded", () => {
         nameInput.placeholder = 'Location Name';
         nameInput.value = name;
 
-        timeZoneSelect.addEventListener("change", () => {
-            nameInput.value = timeZoneSelect.value.split('/')[1].replace('_', ' ');
+        timeZoneInput.addEventListener("input", () => {
+            const results = searchTimeZones(timeZoneInput.value);
+            showSuggestions(timeZoneInput, results);
             saveLocations();
         });
 
@@ -87,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         container.appendChild(dragHandle);
-        container.appendChild(timeZoneSelect);
+        container.appendChild(timeZoneInput);
         container.appendChild(nameInput);
         container.appendChild(upButton);
         container.appendChild(downButton);
@@ -169,5 +162,33 @@ document.addEventListener("DOMContentLoaded", () => {
             window.opener.updateTime();
             window.opener.populateMeetingPlanner();
         }
+    }
+
+    function searchTimeZones(query) {
+        const timeZones = Intl.supportedValuesOf('timeZone');
+        const fuse = new Fuse(timeZones, { includeScore: true });
+        const results = fuse.search(query);
+        return results.map(result => result.item);
+    }
+
+    function showSuggestions(input, suggestions) {
+        let suggestionBox = input.nextElementSibling;
+        if (!suggestionBox || !suggestionBox.classList.contains('suggestion-box')) {
+            suggestionBox = document.createElement('div');
+            suggestionBox.className = 'suggestion-box';
+            input.parentNode.insertBefore(suggestionBox, input.nextSibling);
+        }
+        suggestionBox.innerHTML = '';
+        suggestions.forEach(suggestion => {
+            const suggestionItem = document.createElement('div');
+            suggestionItem.className = 'suggestion-item';
+            suggestionItem.textContent = suggestion;
+            suggestionItem.addEventListener('click', () => {
+                input.value = suggestion;
+                suggestionBox.innerHTML = '';
+                saveLocations();
+            });
+            suggestionBox.appendChild(suggestionItem);
+        });
     }
 });
