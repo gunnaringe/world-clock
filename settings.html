@@ -9,34 +9,71 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container mt-5">
-        <h2 class="header-blue">Settings</h2>
-        <form>
-            <div class="form-group row">
-                <label for="hour-format" class="col-sm-3 col-form-label">Hour Format:</label>
-                <div class="col-sm-9">
-                    <select id="hour-format" class="form-control">
-                        <option value="12">12-hour</option>
-                        <option value="24">24-hour</option>
-                    </select>
+    <div class="settings-container">
+        <div class="settings-header">
+            <h1 class="settings-title">⚙️ World Clock Settings</h1>
+            <p class="settings-subtitle">Customize your time zones and display preferences</p>
+        </div>
+
+        <div class="settings-content">
+            <!-- General Settings Card -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <h3 class="card-title">🕐 Display Settings</h3>
                 </div>
-            </div>
-            <div class="form-group row">
-                <label for="screen-flash" class="col-sm-3 col-form-label">Prevent Screen Burnout:</label>
-                <div class="col-sm-9">
-                    <div class="form-check">
-                        <input type="checkbox" id="screen-flash" class="form-check-input">
-                        <button id="preview-flash" type="button" class="btn btn-primary ml-3">Preview</button>
+                <div class="card-body">
+                    <div class="setting-item">
+                        <label for="hour-format" class="setting-label">Time Format</label>
+                        <select id="hour-format" class="setting-select">
+                            <option value="12">12-hour (AM/PM)</option>
+                            <option value="24">24-hour</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label for="screen-flash" class="setting-label">Screen Burn-in Protection</label>
+                        <div class="setting-control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="screen-flash">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <button id="preview-flash" type="button" class="preview-btn">Preview</button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </form>
-        <div id="locations-container" class="mt-4">
-            <!-- Location inputs will be populated by JavaScript -->
+
+            <!-- Locations Card -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <h3 class="card-title">🌍 Time Zone Locations</h3>
+                    <p class="card-description">Add and manage your time zones</p>
+                </div>
+                <div class="card-body">
+                    <div class="timezone-help">
+                        <div class="help-icon">💡</div>
+                        <div class="help-text">
+                            <strong>Quick Tips:</strong> Search by city name (e.g., "New York", "London"),
+                            use UTC offsets (e.g., "UTC+1", "UTC-5"), or browse suggestions as you type.
+                        </div>
+                    </div>
+
+                    <div id="locations-container" class="locations-list">
+                        <!-- Location inputs will be populated by JavaScript -->
+                    </div>
+
+                    <button id="add-location" class="add-location-btn">
+                        <span class="btn-icon">➕</span>
+                        Add New Location
+                    </button>
+                </div>
+            </div>
         </div>
-        <button id="add-location" class="btn btn-secondary mt-3">Add Location</button>
-        <div class="bottom-link mt-4">
-            <a href="index.html" class="pretty-link">Back to Clock</a>
+
+        <div class="settings-footer">
+            <a href="index.html" class="back-link">
+                <span class="back-icon">←</span>
+                Back to Clock
+            </a>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6"></script>
