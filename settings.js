@@ -147,42 +147,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
-        removeButton.textContent = '−';
+        removeButton.innerHTML = '🗑️';
         removeButton.className = 'remove-button';
+        removeButton.title = 'Remove location';
         removeButton.addEventListener('click', () => {
             locationsContainer.removeChild(container);
             saveLocations();
         });
 
-        const upButton = document.createElement('button');
-        upButton.type = 'button';
-        upButton.innerHTML = '↑';
-        upButton.className = 'arrow-button';
-        upButton.addEventListener('click', () => {
-            const prev = container.previousElementSibling;
-            if (prev) {
-                locationsContainer.insertBefore(container, prev);
-                saveLocations();
-            }
-        });
-
-        const downButton = document.createElement('button');
-        downButton.type = 'button';
-        downButton.innerHTML = '↓';
-        downButton.className = 'arrow-button';
-        downButton.addEventListener('click', () => {
-            const next = container.nextElementSibling;
-            if (next) {
-                locationsContainer.insertBefore(next, container);
-                saveLocations();
-            }
-        });
-
         container.appendChild(dragHandle);
         container.appendChild(timeZoneContainer);
         container.appendChild(nameInput);
-        container.appendChild(upButton);
-        container.appendChild(downButton);
         container.appendChild(removeButton);
         locationsContainer.appendChild(container);
 
@@ -208,7 +183,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        updateArrows();
+
     }
 
     function getDragAfterElement(container, y) {
@@ -233,28 +208,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         localStorage.setItem('locations', JSON.stringify(newLocations));
         updateTimeAndPlanner();
-        updateArrows();
     }
 
-    function updateArrows() {
-        const containers = locationsContainer.children;
-        Array.from(containers).forEach((container, index) => {
-            const upButton = container.querySelector('.arrow-button:nth-of-type(1)');
-            const downButton = container.querySelector('.arrow-button:nth-of-type(2)');
-            upButton.style.display = 'inline-flex';
-            downButton.style.display = 'inline-flex';
-            if (index === 0) {
-                upButton.innerHTML = '';
-            } else {
-                upButton.innerHTML = '↑';
-            }
-            if (index === containers.length - 1) {
-                downButton.innerHTML = '';
-            } else {
-                downButton.innerHTML = '↓';
-            }
-        });
-    }
+
 
     function updateTimeAndPlanner() {
         if (window.opener) {

@@ -117,7 +117,7 @@ td.redish {
 
 .location-input {
     margin-bottom: 10px;
-    max-width: 600px;
+    width: 100%;
     margin-left: 0; /* Align to the left */
     display: flex;
     align-items: center;
@@ -148,6 +148,8 @@ td.redish {
     border: 1px solid #ccc;
     font-size: 16px;
     height: 36px;
+    flex: 1;
+    min-width: 0;
 }
 
 .location-timezone {
@@ -156,7 +158,8 @@ td.redish {
     border: 1px solid #ccc;
     font-size: 16px;
     position: relative;
-    width: 200px;
+    flex: 1;
+    min-width: 0;
     padding: 8px 12px;
 }
 
@@ -235,23 +238,7 @@ td.redish {
     margin-bottom: 20px;
 }
 
-.arrow-button {
-    background-color: #ccc;
-    border: none;
-    border-radius: 5px;
-    font-size: 14px;
-    cursor: pointer;
-    margin-left: 5px;
-    height: 36px;
-    width: 36px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
 
-.arrow-button:hover {
-    background-color: #bbb;
-}
 
 .location-input.dragging {
     opacity: 0.5;
@@ -319,6 +306,8 @@ td.redish {
     display: flex;
     flex-direction: column;
     margin-right: 10px;
+    flex: 1;
+    min-width: 0;
 }
 
 .utc-quick-select {
@@ -620,6 +609,8 @@ input:checked + .toggle-slider:before {
     gap: 16px;
     transition: all 0.2s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .location-input:hover {
@@ -669,46 +660,41 @@ input:checked + .toggle-slider:before {
 
 .location-name {
     flex: 1;
-    min-width: 150px;
+    min-width: 0;
 }
 
 .location-timezone {
     flex: 1;
-    min-width: 200px;
+    min-width: 0;
     position: relative;
 }
 
-/* Control Buttons */
-.arrow-button, .remove-button {
-    background: #f8f9fa;
-    border: 2px solid #e9ecef;
+/* Remove Button */
+.remove-button {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border: none;
     border-radius: 8px;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-
-.arrow-button:hover {
-    background: #e9ecef;
-    border-color: #dee2e6;
-    transform: translateY(-1px);
-}
-
-.remove-button {
-    color: #dc3545;
-    border-color: #f5c6cb;
+    font-size: 1rem;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
 }
 
 .remove-button:hover {
-    background: #f8d7da;
-    border-color: #f5c6cb;
+    background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+.remove-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
 }
 
 /* Add Location Button */

@@ -13,7 +13,7 @@ function updateTime() {
         const offset = getTimezoneOffset(location.timeZone);
         document.getElementById(`time-${location.id}`).innerText = time;
         document.getElementById(`date-${location.id}`).innerText = date;
-        document.getElementById(`timezone-${location.id}`).innerText = offset;
+        document.getElementById(`timezone-${location.id}`).innerText = offset.replace('GMT', 'UTC');
     });
 }
 
