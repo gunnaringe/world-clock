@@ -3,83 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings</title>
+    <meta name="color-scheme" content="dark light">
+    <title>Settings · World Clock</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <div class="settings-container">
-        <div class="settings-header">
-            <h1 class="settings-title">⚙️ World Clock Settings</h1>
-            <p class="settings-subtitle">Customize your time zones and display preferences</p>
-        </div>
+<body class="settings-page">
+    <header class="topbar">
+        <a href="index.html" class="back" id="back">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+            Clock
+        </a>
+        <h1 class="brand">Settings</h1>
+        <span class="topbar-spacer"></span>
+    </header>
 
-        <div class="settings-content">
-            <!-- General Settings Card -->
-            <div class="settings-card">
-                <div class="card-header">
-                    <h3 class="card-title">🕐 Display Settings</h3>
-                </div>
-                <div class="card-body">
-                    <div class="setting-item">
-                        <label for="hour-format" class="setting-label">Time Format</label>
-                        <select id="hour-format" class="setting-select">
-                            <option value="12">12-hour (AM/PM)</option>
-                            <option value="24">24-hour</option>
-                        </select>
-                    </div>
-                    <div class="setting-item">
-                        <label for="screen-flash" class="setting-label">Screen Burn-in Protection</label>
-                        <div class="setting-control">
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="screen-flash">
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <button id="preview-flash" type="button" class="preview-btn">Preview</button>
-                        </div>
-                    </div>
-                </div>
+    <main class="wrap narrow">
+        <section class="card section">
+            <h2>Places</h2>
+            <p class="hint">Search for a city, a time zone like <em>America/Denver</em>, or an offset like <em>UTC+5</em>.</p>
+
+            <div class="search">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                <input id="search" type="search" placeholder="Add a city…" autocomplete="off" spellcheck="false"
+                       role="combobox" aria-expanded="false" aria-controls="results" aria-autocomplete="list">
+                <ul id="results" class="results" role="listbox" hidden></ul>
             </div>
 
-            <!-- Locations Card -->
-            <div class="settings-card">
-                <div class="card-header">
-                    <h3 class="card-title">🌍 Time Zone Locations</h3>
-                    <p class="card-description">Add and manage your time zones</p>
-                </div>
-                <div class="card-body">
-                    <div class="timezone-help">
-                        <div class="help-icon">💡</div>
-                        <div class="help-text">
-                            <strong>Quick Tips:</strong> Search by city name (e.g., "New York", "London"),
-                            use UTC offsets (e.g., "UTC+1", "UTC-5"), or browse suggestions as you type.
-                        </div>
-                    </div>
+            <ol id="places" class="places"></ol>
+            <p id="places-empty" class="hint empty-list" hidden>No places yet. Search above to add one.</p>
+        </section>
 
-                    <div id="locations-container" class="locations-list">
-                        <!-- Location inputs will be populated by JavaScript -->
-                    </div>
-
-                    <button id="add-location" class="add-location-btn">
-                        <span class="btn-icon">➕</span>
-                        Add New Location
-                    </button>
+        <section class="card section">
+            <h2>Display</h2>
+            <div class="row">
+                <span class="row-label">Time format</span>
+                <div class="segmented" role="radiogroup" aria-label="Time format">
+                    <button type="button" role="radio" data-format="24">24-hour</button>
+                    <button type="button" role="radio" data-format="12">12-hour</button>
                 </div>
             </div>
-        </div>
+            <div class="row">
+                <label class="row-label" for="flash">
+                    Burn-in protection
+                    <small>Flashes the screen briefly every 30 minutes</small>
+                </label>
+                <div class="row-controls">
+                    <button type="button" class="btn ghost small" id="preview">Preview</button>
+                    <label class="switch"><input type="checkbox" id="flash"><span></span></label>
+                </div>
+            </div>
+        </section>
+    </main>
 
-        <div class="settings-footer">
-            <a href="index.html" class="back-link">
-                <span class="back-icon">←</span>
-                Back to Clock
-            </a>
-        </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="common.js"></script>
     <script src="settings.js"></script>
 </body>
