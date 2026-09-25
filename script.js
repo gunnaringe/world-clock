@@ -50,6 +50,8 @@ function renderClocks() {
         return card;
     }));
     clocksEl.dataset.count = Math.min(locations.length, 7);
+    // Columns when filling a large screen: one row up to six, then two rows.
+    clocksEl.style.setProperty('--cols', locations.length <= 6 ? locations.length : Math.ceil(locations.length / 2));
 }
 
 function tickClocks(now) {
@@ -101,7 +103,25 @@ function renderPlanner(start) {
         rows.push(tr);
     }
     bodyEl.replaceChildren(...rows);
+    fitTable();
 }
+
+// In the fill-the-screen layout, shrink the table text until all 24 rows fit
+// (short laptop screens, or many places with the clocks in two rows).
+const fillScreen = matchMedia('(min-width: 900px) and (min-height: 560px)');
+function fitTable() {
+    const box = bodyEl.closest('.table-scroll');
+    const table = bodyEl.closest('table');
+    table.style.removeProperty('--td-font');
+    if (!fillScreen.matches) return;
+    let px = parseFloat(getComputedStyle(bodyEl.querySelector('td') || table).fontSize);
+    while (box.scrollHeight > box.clientHeight + 1 && px > 9) {
+        px -= 0.5;
+        table.style.setProperty('--td-font', px + 'px');
+    }
+}
+let resizeTimer;
+addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(fitTable, 100); });
 
 function startOfLocalHour(now) {
     const w = wall(LOCAL, now);
@@ -159,4 +179,55 @@ function renderAll() {
 renderAll();
 // Coming back from settings with the Back button restores a cached page.
 addEventListener('pageshow', (e) => { if (e.persisted) renderAll(); });
+
+// ---------- Fullscreen (for wall screens) ----------
+
+const fsBtn = document.getElementById('fullscreen');
+const root = document.documentElement;
+let wakeLock = null;
+
+function toggleFullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else root.requestFullscreen?.().catch(() => {});
+}
+
+// Keep the screen awake while fullscreen; the lock is dropped when the tab is hidden.
+async function syncWakeLock() {
+    const want = !!document.fullscreenElement && document.visibilityState === 'visible';
+    if (want && !wakeLock && navigator.wakeLock) {
+        try {
+            wakeLock = await navigator.wakeLock.request('screen');
+            wakeLock.addEventListener('release', () => { wakeLock = null; });
+        } catch {}
+    } else if (!want && wakeLock) {
+        wakeLock.release();
+    }
+}
+
+// Hide the top bar and cursor after a few seconds without mouse movement.
+let idleTimer;
+function wake() {
+    document.body.classList.remove('idle');
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => document.body.classList.add('idle'), 3000);
+}
+
+if (root.requestFullscreen) {
+    fsBtn.hidden = false;
+    fsBtn.addEventListener('click', toggleFullscreen);
+    addEventListener('keydown', (e) => {
+        if ((e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.metaKey && !e.altKey) toggleFullscreen();
+    });
+    document.addEventListener('fullscreenchange', () => {
+        const on = !!document.fullscreenElement;
+        fsBtn.setAttribute('aria-label', on ? 'Exit fullscreen' : 'Fullscreen');
+        fsBtn.title = on ? 'Exit fullscreen (F)' : 'Fullscreen (F)';
+        syncWakeLock();
+        if (on) wake(); else { clearTimeout(idleTimer); document.body.classList.remove('idle'); }
+    });
+    document.addEventListener('visibilitychange', syncWakeLock);
+    for (const ev of ['mousemove', 'pointerdown', 'keydown']) {
+        addEventListener(ev, () => { if (document.fullscreenElement) wake(); });
+    }
+}
 addEventListener('storage', renderAll);
