@@ -92,7 +92,7 @@ function placeHoursPanel(p) {
     const panel = el('div', 'place-hours');
     const toggleRow = el('label', 'row flat');
     const label = el('span', 'row-label', 'Custom hours');
-    label.append(el('small', null, p.hours ? 'Only for this place' : 'Uses the hours above'));
+    label.append(el('small', null, p.hours ? 'Only for this place' : 'Uses the default hours from the Hours section'));
     const sw = el('span', 'switch');
     const input = el('input');
     input.type = 'checkbox';
