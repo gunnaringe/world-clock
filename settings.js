@@ -22,9 +22,11 @@ function el(tag, className, text) {
     return e;
 }
 
+// `kind` doubles as data-action, which is how focus is found again after a re-render.
 function iconButton(kind, label, onClick) {
     const b = el('button', 'icon-btn small' + (kind === 'remove' ? ' danger' : ''));
     b.type = 'button';
+    b.dataset.action = kind;
     b.title = label;
     b.setAttribute('aria-label', label);
     b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[kind]}</svg>`;
@@ -63,23 +65,25 @@ function hourSelect(value, label, onChange) {
 
 // Rows editing a DEFAULT_HOURS-shaped object in place; onChange after each edit.
 function hoursEditor(hours, onChange) {
-    const row = (title, note, startKey, endKey) => {
+    const row = (titleKey, noteKey, startKey, endKey) => {
+        const title = t(titleKey);
         const r = el('div', 'row');
+        r.dataset.range = startKey;
         const label = el('span', 'row-label', title);
-        if (note) label.append(el('small', null, note));
+        if (noteKey) label.append(el('small', null, t(noteKey)));
         const set = (k) => (v) => { hours[k] = v; onChange(); };
         const range = el('div', 'hour-range');
         range.append(
-            hourSelect(hours[startKey], title + ' start', set(startKey)),
+            hourSelect(hours[startKey], t('rangeStart', { label: title }), set(startKey)),
             el('span', 'hour-sep', '–'),
-            hourSelect(hours[endKey], title + ' end', set(endKey)));
+            hourSelect(hours[endKey], t('rangeEnd', { label: title }), set(endKey)));
         r.append(label, range);
         return r;
     };
     const wrap = el('div', 'hours-editor');
     wrap.append(
-        row('Working hours', null, 'workStart', 'workEnd'),
-        row('Awake hours', 'Morning & evening; night is outside these', 'dayStart', 'dayEnd'));
+        row('workHours', null, 'workStart', 'workEnd'),
+        row('awakeHours', 'awakeNote', 'dayStart', 'dayEnd'));
     return wrap;
 }
 
@@ -91,8 +95,8 @@ function renderGlobalHours() {
 function placeHoursPanel(p) {
     const panel = el('div', 'place-hours');
     const toggleRow = el('label', 'row flat');
-    const label = el('span', 'row-label', 'Custom hours');
-    label.append(el('small', null, p.hours ? 'Only for this place' : 'Uses the default hours from the Hours section'));
+    const label = el('span', 'row-label', t('customHours'));
+    label.append(el('small', null, t(p.hours ? 'customOn' : 'customOff')));
     const sw = el('span', 'switch');
     const input = el('input');
     input.type = 'checkbox';
@@ -112,7 +116,7 @@ function placeHoursPanel(p) {
 
 // ---------- Places ----------
 
-function renderPlaces(focusIndex, focusKind) {
+function renderPlaces(focusIndex, focusAction) {
     placesEmptyEl.hidden = places.length > 0;
     placesEl.replaceChildren(...places.map((p, i) => {
         const li = el('li', 'place');
@@ -120,7 +124,7 @@ function renderPlaces(focusIndex, focusKind) {
         const name = el('input', 'place-name');
         name.value = p.name;
         name.placeholder = cityOf(p.timeZone);
-        name.setAttribute('aria-label', 'Name');
+        name.setAttribute('aria-label', t('name'));
         name.addEventListener('input', () => { p.name = name.value; save(); });
         name.addEventListener('blur', () => {
             if (!name.value.trim()) { name.value = p.name = cityOf(p.timeZone); save(); }
@@ -135,17 +139,16 @@ function renderPlaces(focusIndex, focusKind) {
             save();
             renderPlaces(i + d, d < 0 ? 'up' : 'down');
         };
-        const hoursBtn = iconButton('hours', 'Hours for ' + p.name, () => {
+        const hoursBtn = iconButton('hours', t('hoursFor', { name: p.name }), () => {
             if (openHours.has(p)) openHours.delete(p); else openHours.add(p);
-            renderPlaces();
-            placesEl.children[i].querySelector('[aria-label^="Hours"]').focus();
+            renderPlaces(i, 'hours');
         });
         hoursBtn.setAttribute('aria-expanded', String(openHours.has(p)));
-        const up = iconButton('up', 'Move up', move(-1));
-        const down = iconButton('down', 'Move down', move(1));
+        const up = iconButton('up', t('moveUp'), move(-1));
+        const down = iconButton('down', t('moveDown'), move(1));
         up.disabled = i === 0;
         down.disabled = i === places.length - 1;
-        actions.append(hoursBtn, up, down, iconButton('remove', 'Remove ' + p.name, () => {
+        actions.append(hoursBtn, up, down, iconButton('remove', t('remove', { name: p.name }), () => {
             openHours.delete(p);
             places.splice(i, 1);
             save();
@@ -157,8 +160,9 @@ function renderPlaces(focusIndex, focusKind) {
     }));
     tickMeta();
     if (focusIndex != null) {
-        const btn = placesEl.children[focusIndex]?.querySelector(`[aria-label="Move ${focusKind}"]`);
-        (btn && !btn.disabled ? btn : placesEl.children[focusIndex]?.querySelector('.place-name'))?.focus();
+        const li = placesEl.children[focusIndex];
+        const btn = li?.querySelector(`[data-action="${focusAction}"]`);
+        (btn && !btn.disabled ? btn : li?.querySelector('.place-name'))?.focus();
     }
 }
 
@@ -168,7 +172,7 @@ function tickMeta() {
         const p = places[meta.dataset.index];
         const m = zoneMeta(p.timeZone, now);
         meta.replaceChildren(el('span', null, m.where), el('span', 'chip', m.off), el('span', 'place-time', m.time));
-        if (p.hours) meta.append(el('span', 'chip accent', 'Custom hours'));
+        if (p.hours) meta.append(el('span', 'chip accent', t('customHours')));
     }
 }
 
@@ -186,7 +190,7 @@ function renderResults() {
     if (!q.trim()) { openResults(false); return; }
     const now = new Date();
     if (!results.length) {
-        resultsEl.replaceChildren(el('li', 'result none', 'No matches'));
+        resultsEl.replaceChildren(el('li', 'result none', t('noMatches')));
     } else {
         resultsEl.replaceChildren(...results.map((r, i) => {
             const m = zoneMeta(r.zone, now);
@@ -246,34 +250,40 @@ searchEl.addEventListener('keydown', (e) => {
 
 // ---------- Display ----------
 
-function renderFormat() {
-    for (const b of document.querySelectorAll('[data-format]')) {
-        b.setAttribute('aria-checked', String(b.dataset.format === getHourFormat()));
-    }
+// Segmented controls: [data-<attr>] buttons reflecting get() and calling set().
+function segmented(attr, get, set) {
+    const buttons = document.querySelectorAll(`[data-${attr}]`);
+    const key = attr.replace(/-(\w)/g, (_, c) => c.toUpperCase());
+    const render = () => {
+        for (const b of buttons) b.setAttribute('aria-checked', String(b.dataset[key] === get()));
+    };
+    for (const b of buttons) b.addEventListener('click', () => { set(b.dataset[key]); render(); });
+    return render;
 }
 
-for (const b of document.querySelectorAll('[data-format]')) {
-    b.addEventListener('click', () => {
-        setHourFormat(b.dataset.format);
-        renderFormat();
-        renderGlobalHours();
-        renderPlaces();
-    });
-}
+const renderFormat = segmented('format', getHourFormat, (v) => {
+    setHourFormat(v);
+    renderGlobalHours();
+    renderPlaces();
+});
+const renderTheme = segmented('theme-choice', getTheme, (v) => {
+    localStorage.setItem('theme', v);
+    applyTheme();
+});
+const renderLang = segmented('lang-choice', getLangSetting, (v) => {
+    localStorage.setItem('lang', v);
+    renderAll();
+});
+const renderProtection = segmented('protection', getProtection, (v) => {
+    setProtection(v);
+    renderProtectionNote();
+});
 
-function renderTheme() {
-    const current = localStorage.getItem('theme') || 'auto';
-    for (const b of document.querySelectorAll('[data-theme-choice]')) {
-        b.setAttribute('aria-checked', String(b.dataset.themeChoice === current));
-    }
-}
-
-for (const b of document.querySelectorAll('[data-theme-choice]')) {
-    b.addEventListener('click', () => {
-        localStorage.setItem('theme', b.dataset.themeChoice);
-        applyTheme();
-        renderTheme();
-    });
+function renderProtectionNote() {
+    const mode = getProtection();
+    document.getElementById('protection-note').textContent =
+        t({ none: 'protNoneNote', gentle: 'protGentleNote', flash: 'protFlashNote' }[mode]);
+    document.getElementById('preview').hidden = mode !== 'flash';
 }
 
 function renderToggles() {
@@ -283,20 +293,55 @@ function renderToggles() {
 for (const input of document.querySelectorAll('[data-toggle]')) {
     input.addEventListener('change', () => setToggle(input.dataset.toggle, input.checked));
 }
+
 document.getElementById('preview').addEventListener('click', runFlashSequence);
 
-renderFormat();
-renderTheme();
-renderToggles();
-renderGlobalHours();
-renderPlaces();
+// ---------- Share and reset ----------
+
+const shareBtn = document.getElementById('share');
+shareBtn.addEventListener('click', async () => {
+    const url = shareUrl();
+    // Native share sheet on phones/tablets; clipboard elsewhere; and if both
+    // fail, a prompt with the link ready to copy by hand.
+    if (navigator.share && matchMedia('(pointer: coarse)').matches) {
+        try {
+            await navigator.share({ title: t('appTitle'), url });
+            return;
+        } catch (err) {
+            if (err.name === 'AbortError') return;
+        }
+    }
+    try {
+        await navigator.clipboard.writeText(url);
+        shareBtn.textContent = t('linkCopied');
+        setTimeout(() => { shareBtn.textContent = t('shareBtn'); }, 2000);
+    } catch {
+        prompt(t('copyThisLink'), url);
+    }
+});
 
 document.getElementById('reset').addEventListener('click', () => {
-    if (!confirm('Reset all settings? Your places and preferences on this device will be removed.')) return;
+    if (!confirm(t('resetConfirm'))) return;
     resetSettings();
     location.reload();
 });
+
+// ---------- Start ----------
+
+function renderAll() {
+    applyI18n();
+    renderFormat();
+    renderTheme();
+    renderLang();
+    renderProtection();
+    renderProtectionNote();
+    renderToggles();
+    renderGlobalHours();
+    renderPlaces();
+}
+
+renderAll();
 setInterval(tickMeta, 5000);
 addEventListener('pageshow', (e) => {
-    if (e.persisted) { places = getLocations(); renderPlaces(); renderFormat(); renderTheme(); renderToggles(); renderGlobalHours(); }
+    if (e.persisted) { places = getLocations(); renderAll(); }
 });

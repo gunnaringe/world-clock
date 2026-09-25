@@ -1,22 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-title="appTitle">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="dark light">
     <title>World Clock</title>
     <link rel="stylesheet" href="styles.css">
+    <meta name="theme-color" content="#0a0e1a">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <script src="theme.js"></script>
 </head>
 <body>
     <header class="topbar">
-        <h1 class="brand"><span class="brand-dot"></span>World Clock</h1>
+        <h1 class="brand"><span class="brand-dot"></span><span data-i18n="appTitle">World Clock</span></h1>
         <div class="topbar-actions">
-        <button type="button" class="icon-btn" id="fullscreen" title="Fullscreen (F)" aria-label="Fullscreen" hidden>
+        <button type="button" class="icon-btn" id="fullscreen" data-i18n-title="fullscreen" data-i18n-aria="fullscreen" hidden>
             <svg class="fs-enter" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>
             <svg class="fs-exit" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/></svg>
         </button>
-        <a href="settings.html" class="icon-btn" title="Settings" aria-label="Settings">
+        <a href="settings.html" class="icon-btn" data-i18n-title="settings" data-i18n-aria="settings">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.66 0-1.25.4-1.51 1Z"/></svg>
         </a>
         </div>
@@ -26,21 +30,21 @@
         <section class="clocks" id="clocks"></section>
 
         <section class="empty" id="empty" hidden>
-            <p>No places yet.</p>
-            <a href="settings.html" class="btn">Add a city</a>
+            <p data-i18n="noPlaces"></p>
+            <a href="settings.html" class="btn" data-i18n="addCity"></a>
         </section>
 
         <section class="planner card" id="planner">
             <div class="planner-head">
-                <h2>Next 24 hours</h2>
+                <h2 data-i18n="next24"></h2>
                 <ul class="legend">
-                    <li><span class="swatch work"></span>Working hours <span class="legend-range" id="legend-work"></span></li>
-                    <li><span class="swatch edge"></span>Morning &amp; evening</li>
-                    <li><span class="swatch night"></span>Night <span class="legend-range" id="legend-night"></span></li>
+                    <li><span class="swatch work"></span><span data-i18n="legendWork"></span> <span class="legend-range" id="legend-work"></span></li>
+                    <li><span class="swatch edge"></span><span data-i18n="legendEdge"></span></li>
+                    <li><span class="swatch night"></span><span data-i18n="legendNight"></span> <span class="legend-range" id="legend-night"></span></li>
                 </ul>
             </div>
             <div class="table-scroll">
-                <table id="planner-table">
+                <table id="planner-table" data-i18n-title="copyHint">
                     <thead><tr id="planner-header"></tr></thead>
                     <tbody id="planner-body"></tbody>
                 </table>
@@ -48,6 +52,12 @@
         </section>
     </main>
 
+    <div id="toast" class="toast" role="status" hidden>
+        <span id="toast-text"></span>
+        <button type="button" class="btn small" id="toast-action" hidden></button>
+    </div>
+
+    <script src="i18n.js"></script>
     <script src="common.js"></script>
     <script src="script.js"></script>
 </body>
