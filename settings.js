@@ -6,11 +6,13 @@ const placesEmptyEl = document.getElementById('places-empty');
 let places = getLocations();
 let results = [];
 let active = 0;
+const openHours = new Set(); // places whose hours panel is expanded
 
 const ICONS = {
     up: '<path d="M6 15l6-6 6 6"/>',
     down: '<path d="M6 9l6 6 6-6"/>',
     remove: '<path d="M6 6l12 12M18 6L6 18"/>',
+    hours: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
 };
 
 function el(tag, className, text) {
@@ -43,6 +45,71 @@ function save() {
     setLocations(places);
 }
 
+// ---------- Hours ----------
+
+function hourSelect(value, label, onChange) {
+    const s = el('select', 'hour-select');
+    s.setAttribute('aria-label', label);
+    const h12 = getHourFormat() === '12';
+    for (let h = 0; h < 24; h++) {
+        const o = el('option', null, clockText({ h, mi: 0 }, h12, true));
+        o.value = h;
+        s.append(o);
+    }
+    s.value = value;
+    s.addEventListener('change', () => onChange(Number(s.value)));
+    return s;
+}
+
+// Rows editing a DEFAULT_HOURS-shaped object in place; onChange after each edit.
+function hoursEditor(hours, onChange) {
+    const row = (title, note, startKey, endKey) => {
+        const r = el('div', 'row');
+        const label = el('span', 'row-label', title);
+        if (note) label.append(el('small', null, note));
+        const set = (k) => (v) => { hours[k] = v; onChange(); };
+        const range = el('div', 'hour-range');
+        range.append(
+            hourSelect(hours[startKey], title + ' start', set(startKey)),
+            el('span', 'hour-sep', '–'),
+            hourSelect(hours[endKey], title + ' end', set(endKey)));
+        r.append(label, range);
+        return r;
+    };
+    const wrap = el('div', 'hours-editor');
+    wrap.append(
+        row('Working hours', null, 'workStart', 'workEnd'),
+        row('Awake hours', 'Morning & evening; night is outside these', 'dayStart', 'dayEnd'));
+    return wrap;
+}
+
+function renderGlobalHours() {
+    const hours = getHours();
+    document.getElementById('global-hours').replaceChildren(hoursEditor(hours, () => setHours(hours)));
+}
+
+function placeHoursPanel(p) {
+    const panel = el('div', 'place-hours');
+    const toggleRow = el('label', 'row flat');
+    const label = el('span', 'row-label', 'Custom hours');
+    label.append(el('small', null, p.hours ? 'Only for this place' : 'Uses the hours above'));
+    const sw = el('span', 'switch');
+    const input = el('input');
+    input.type = 'checkbox';
+    input.checked = !!p.hours;
+    input.addEventListener('change', () => {
+        p.hours = input.checked ? { ...getHours() } : null;
+        save();
+        panel.replaceWith(placeHoursPanel(p));
+        tickMeta();
+    });
+    sw.append(input, el('span'));
+    toggleRow.append(label, sw);
+    panel.append(toggleRow);
+    if (p.hours) panel.append(hoursEditor(p.hours, save));
+    return panel;
+}
+
 // ---------- Places ----------
 
 function renderPlaces(focusIndex, focusKind) {
@@ -59,7 +126,7 @@ function renderPlaces(focusIndex, focusKind) {
             if (!name.value.trim()) { name.value = p.name = cityOf(p.timeZone); save(); }
         });
         const meta = el('div', 'place-meta');
-        meta.dataset.zone = p.timeZone;
+        meta.dataset.index = i;
         main.append(name, meta);
 
         const actions = el('div', 'place-actions');
@@ -68,16 +135,24 @@ function renderPlaces(focusIndex, focusKind) {
             save();
             renderPlaces(i + d, d < 0 ? 'up' : 'down');
         };
+        const hoursBtn = iconButton('hours', 'Hours for ' + p.name, () => {
+            if (openHours.has(p)) openHours.delete(p); else openHours.add(p);
+            renderPlaces();
+            placesEl.children[i].querySelector('[aria-label^="Hours"]').focus();
+        });
+        hoursBtn.setAttribute('aria-expanded', String(openHours.has(p)));
         const up = iconButton('up', 'Move up', move(-1));
         const down = iconButton('down', 'Move down', move(1));
         up.disabled = i === 0;
         down.disabled = i === places.length - 1;
-        actions.append(up, down, iconButton('remove', 'Remove ' + p.name, () => {
+        actions.append(hoursBtn, up, down, iconButton('remove', 'Remove ' + p.name, () => {
+            openHours.delete(p);
             places.splice(i, 1);
             save();
             renderPlaces();
         }));
         li.append(main, actions);
+        if (openHours.has(p)) li.append(placeHoursPanel(p));
         return li;
     }));
     tickMeta();
@@ -90,8 +165,10 @@ function renderPlaces(focusIndex, focusKind) {
 function tickMeta() {
     const now = new Date();
     for (const meta of placesEl.querySelectorAll('.place-meta')) {
-        const m = zoneMeta(meta.dataset.zone, now);
+        const p = places[meta.dataset.index];
+        const m = zoneMeta(p.timeZone, now);
         meta.replaceChildren(el('span', null, m.where), el('span', 'chip', m.off), el('span', 'place-time', m.time));
+        if (p.hours) meta.append(el('span', 'chip accent', 'Custom hours'));
     }
 }
 
@@ -179,7 +256,8 @@ for (const b of document.querySelectorAll('[data-format]')) {
     b.addEventListener('click', () => {
         setHourFormat(b.dataset.format);
         renderFormat();
-        tickMeta();
+        renderGlobalHours();
+        renderPlaces();
     });
 }
 
@@ -210,8 +288,15 @@ document.getElementById('preview').addEventListener('click', runFlashSequence);
 renderFormat();
 renderTheme();
 renderToggles();
+renderGlobalHours();
 renderPlaces();
+
+document.getElementById('reset').addEventListener('click', () => {
+    if (!confirm('Reset all settings? Your places and preferences on this device will be removed.')) return;
+    resetSettings();
+    location.reload();
+});
 setInterval(tickMeta, 5000);
 addEventListener('pageshow', (e) => {
-    if (e.persisted) { places = getLocations(); renderPlaces(); renderFormat(); renderTheme(); renderToggles(); }
+    if (e.persisted) { places = getLocations(); renderPlaces(); renderFormat(); renderTheme(); renderToggles(); renderGlobalHours(); }
 });

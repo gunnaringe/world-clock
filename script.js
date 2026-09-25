@@ -6,6 +6,8 @@ const bodyEl = document.getElementById('planner-body');
 
 let locations = [];
 let h12 = false;
+let hours = DEFAULT_HOURS;
+const bandOf = (loc, h) => band(h, loc.hours || hours);
 let plannerHour = null; // start of the local hour the table was built for
 
 const dateFmt = (zone) => fmt('date|' + zone, () => new Intl.DateTimeFormat('en-GB', {
@@ -65,7 +67,7 @@ function tickClocks(now) {
         card.querySelector('.clock-date').textContent = dateFmt(zone).format(now);
         card.querySelector('.clock-rel').textContent =
             canon(zone) === LOCAL ? 'Your time' : rel + ' · ' + relativeText(w.off - local.off);
-        card.dataset.band = band(w.h);
+        card.dataset.band = bandOf(locations[i], w.h);
     });
 }
 
@@ -87,7 +89,7 @@ function renderPlanner(start) {
         if (i === 0) tr.className = 'now';
         locations.forEach((loc, c) => {
             const w = wall(loc.timeZone, at);
-            const td = el('td', band(w.h));
+            const td = el('td', bandOf(loc, w.h));
             td.append(el('span', 't', clockText(w, h12, true)));
             // Mark where a column crosses into a new day, and the first row if
             // that place is already on a different day than you.
@@ -113,7 +115,7 @@ function tickNowRow(now) {
     [...row.children].forEach((td, c) => {
         const w = wall(locations[c].timeZone, now);
         td.querySelector('.t').textContent = clockText(w, h12);
-        td.className = band(w.h);
+        td.className = bandOf(locations[c], w.h);
     });
 }
 
@@ -127,6 +129,13 @@ function tick() {
     tick.timer = setTimeout(tick, 1000 - (Date.now() % 1000) + 5);
 }
 
+const range = (a, b) => clockText({ h: a, mi: 0 }, h12, true) + '–' + clockText({ h: b, mi: 0 }, h12, true);
+
+function renderLegend() {
+    document.getElementById('legend-work').textContent = range(hours.workStart, hours.workEnd);
+    document.getElementById('legend-night').textContent = range(hours.dayEnd, hours.dayStart);
+}
+
 function renderAll() {
     locations = getLocations();
     // "Show your time zone": add it first unless one of the places already is.
@@ -134,6 +143,8 @@ function renderAll() {
         locations.unshift({ name: cityOf(LOCAL), timeZone: LOCAL });
     }
     h12 = getHourFormat() === '12';
+    hours = getHours();
+    renderLegend();
     emptyEl.hidden = locations.length > 0;
     plannerEl.hidden = locations.length === 0;
     renderClocks();

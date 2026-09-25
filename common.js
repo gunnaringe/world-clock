@@ -98,10 +98,29 @@ function clockText(w, h12, short = false) {
     return (short && !w.mi ? h : h + ':' + pad(w.mi)) + ' ' + ap;
 }
 
-// Day band used for colouring: work hours, the edges of the day, and night.
-function band(h) {
-    if (h >= 8 && h < 17) return 'work';
-    if (h === 7 || (h >= 17 && h < 23)) return 'edge';
+// Hours used for colouring, as whole hours 0-23; ranges are [start, end) and
+// may wrap past midnight. Work wins over awake; outside awake is night.
+// The defaults give work 08-17, morning/evening 07-08 and 17-23, night 23-07.
+const DEFAULT_HOURS = { workStart: 8, workEnd: 17, dayStart: 7, dayEnd: 23 };
+
+function normHours(h) {
+    if (!h || typeof h !== 'object') return null;
+    const out = {};
+    for (const k in DEFAULT_HOURS) {
+        const v = Number(h[k]);
+        out[k] = Number.isInteger(v) && v >= 0 && v <= 24 ? v % 24 : DEFAULT_HOURS[k];
+    }
+    return out;
+}
+
+function inRange(h, start, end) {
+    return start <= end ? h >= start && h < end : h >= start || h < end;
+}
+
+// Day band for an hour: 'work', 'edge' (morning/evening) or 'night'.
+function band(h, hours = DEFAULT_HOURS) {
+    if (inRange(h, hours.workStart, hours.workEnd)) return 'work';
+    if (inRange(h, hours.dayStart, hours.dayEnd)) return 'edge';
     return 'night';
 }
 
@@ -159,7 +178,8 @@ function search(q) {
 // ---------- Settings ----------
 // Same keys and shapes as the first version so saved settings carry over:
 // locations: [{ id, name, timeZone }], hourFormat: "24" | "12", screenFlash: bool.
-// Added since: showLocal, showClocks (bools, see TOGGLES), theme (theme.js).
+// Added since: showLocal, showClocks (bools, see TOGGLES), theme (theme.js),
+// hours (DEFAULT_HOURS shape) and per-location `hours` overriding it.
 
 const defaultLocations = [
     { id: 'clock-trondheim', name: 'Trondheim', timeZone: 'Europe/Oslo' },
@@ -179,13 +199,23 @@ function getLocations() {
     const list = readJSON('locations', null);
     return (Array.isArray(list) ? list : defaultLocations)
         .filter((l) => l && canon(l.timeZone))
-        .map((l) => ({ name: String(l.name || '').trim() || cityOf(l.timeZone), timeZone: l.timeZone }));
+        .map((l) => ({
+            name: String(l.name || '').trim() || cityOf(l.timeZone),
+            timeZone: l.timeZone,
+            hours: normHours(l.hours),
+        }));
 }
 
 function setLocations(list) {
     localStorage.setItem('locations', JSON.stringify(
-        list.map((l, i) => ({ id: 'clock-' + i, name: l.name, timeZone: l.timeZone }))));
+        list.map((l, i) => ({ id: 'clock-' + i, name: l.name, timeZone: l.timeZone, ...(l.hours && { hours: l.hours }) }))));
 }
+
+function getHours() { return normHours(readJSON('hours', null)) || { ...DEFAULT_HOURS }; }
+function setHours(h) { localStorage.setItem('hours', JSON.stringify(h)); }
+
+const SETTINGS_KEYS = ['locations', 'hourFormat', 'screenFlash', 'showLocal', 'showClocks', 'theme', 'hours'];
+function resetSettings() { for (const k of SETTINGS_KEYS) localStorage.removeItem(k); }
 
 function getHourFormat() { return localStorage.getItem('hourFormat') === '12' ? '12' : '24'; }
 function setHourFormat(f) { localStorage.setItem('hourFormat', f); }

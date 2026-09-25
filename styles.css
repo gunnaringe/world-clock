@@ -101,7 +101,7 @@
 [data-theme="hacker"] .switch input:checked + span::after { background: #000; }
 [data-theme="hacker"] .clock-time { font-weight: 400; letter-spacing: -0.06em; }
 [data-theme="hacker"] .clock::before { box-shadow: 0 0 10px var(--band); }
-[data-theme="hacker"] :is(.icon-btn, .btn, .segmented, .segmented button, .search input, .place, .place-name, .results, .result, td, .chip, td .day, .swatch) { border-radius: 3px; }
+[data-theme="hacker"] :is(.icon-btn, .btn, .segmented, .segmented button, .search input, .hour-select, .place, .place-name, .results, .result, td, .chip, td .day, .swatch) { border-radius: 3px; }
 
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -517,6 +517,43 @@ tbody tr:not(.now):hover td { filter: brightness(1.25); }
 }
 .place-time { font-variant-numeric: tabular-nums; }
 .place-actions { display: flex; gap: 4px; }
+.place { flex-wrap: wrap; }
+.place-hours {
+    flex-basis: 100%;
+    margin: 4px 0 2px;
+    padding: 4px 4px 0 0;
+    border-top: 1px dashed var(--border);
+}
+.place-hours .row { padding: 10px 0; }
+.place-hours .row.flat { border-top: 0; }
+.place-hours .row + .row, .place-hours .hours-editor .row { border-top: 1px solid var(--border); }
+.hours-editor .row:first-child { margin-top: 0; }
+.place-hours .row-label { font-size: 0.92rem; }
+.icon-btn[aria-expanded="true"] { color: var(--accent); border-color: var(--accent); }
+
+.hour-range { display: flex; align-items: center; gap: 8px; }
+.hour-sep { color: var(--muted); }
+.hour-select {
+    appearance: none;
+    -webkit-appearance: none;
+    min-width: 88px;
+    padding: 7px 28px 7px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card-strong) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b93a7' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center / 14px;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+}
+.hour-select:focus-visible { border-color: var(--accent); }
+.hour-select option { background: var(--bg); color: var(--text); }
+.chip.accent { color: var(--accent); border-color: var(--accent-soft); background: var(--accent-soft); }
+.row.flat { border-top: 0; padding: 0; }
+.btn.danger { color: var(--danger); }
+.btn.danger:hover { border-color: var(--danger); }
+.legend-range { color: var(--faint); font-variant-numeric: tabular-nums; }
 .empty-list { margin: 16px 0 0; text-align: center; }
 
 .footer { display: flex; justify-content: center; padding: 8px 0 0; }
@@ -539,7 +576,7 @@ tbody tr:not(.now):hover td { filter: brightness(1.25); }
     padding: 16px 0;
     border-top: 1px solid var(--border);
 }
-.section h2 + .row { margin-top: 12px; }
+.section h2 + .row, .hint + #global-hours .row:first-child { margin-top: 12px; }
 .row-label { display: grid; gap: 2px; font-weight: 500; }
 .row-label small { color: var(--muted); font-weight: 400; font-size: 0.8rem; }
 .row-controls { display: flex; align-items: center; gap: 12px; }
