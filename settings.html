@@ -6,6 +6,7 @@
     <meta name="color-scheme" content="dark light">
     <title>Settings · World Clock</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="theme.js"></script>
 </head>
 <body class="settings-page">
     <header class="topbar">
@@ -35,6 +36,15 @@
 
         <section class="card section">
             <h2>Display</h2>
+            <div class="row">
+                <span class="row-label">Theme</span>
+                <div class="segmented" role="radiogroup" aria-label="Theme">
+                    <button type="button" role="radio" data-theme-choice="auto">Auto</button>
+                    <button type="button" role="radio" data-theme-choice="light">Light</button>
+                    <button type="button" role="radio" data-theme-choice="dark">Dark</button>
+                    <button type="button" role="radio" data-theme-choice="hacker">Hacker</button>
+                </div>
+            </div>
             <div class="row">
                 <span class="row-label">Time format</span>
                 <div class="segmented" role="radiogroup" aria-label="Time format">

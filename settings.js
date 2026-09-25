@@ -184,13 +184,29 @@ for (const b of document.querySelectorAll('[data-format]')) {
     });
 }
 
+function renderTheme() {
+    const current = localStorage.getItem('theme') || 'auto';
+    for (const b of document.querySelectorAll('[data-theme-choice]')) {
+        b.setAttribute('aria-checked', String(b.dataset.themeChoice === current));
+    }
+}
+
+for (const b of document.querySelectorAll('[data-theme-choice]')) {
+    b.addEventListener('click', () => {
+        localStorage.setItem('theme', b.dataset.themeChoice);
+        applyTheme();
+        renderTheme();
+    });
+}
+
 flashEl.checked = getScreenFlash();
 flashEl.addEventListener('change', () => setScreenFlash(flashEl.checked));
 document.getElementById('preview').addEventListener('click', runFlashSequence);
 
 renderFormat();
+renderTheme();
 renderPlaces();
 setInterval(tickMeta, 5000);
 addEventListener('pageshow', (e) => {
-    if (e.persisted) { places = getLocations(); renderPlaces(); renderFormat(); flashEl.checked = getScreenFlash(); }
+    if (e.persisted) { places = getLocations(); renderPlaces(); renderFormat(); renderTheme(); flashEl.checked = getScreenFlash(); }
 });

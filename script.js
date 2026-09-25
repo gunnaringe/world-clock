@@ -106,11 +106,23 @@ function startOfLocalHour(now) {
     return now.getTime() - (w.mi * 60 + w.s) * 1000 - now.getMilliseconds();
 }
 
+// The first row is the current hour; show the actual time there, not hh:00.
+function tickNowRow(now) {
+    const row = bodyEl.firstElementChild;
+    if (!row) return;
+    [...row.children].forEach((td, c) => {
+        const w = wall(locations[c].timeZone, now);
+        td.querySelector('.t').textContent = clockText(w, h12);
+        td.className = band(w.h);
+    });
+}
+
 function tick() {
     const now = new Date();
     tickClocks(now);
     const start = startOfLocalHour(now);
     if (start !== plannerHour) renderPlanner(start);
+    tickNowRow(now);
     clearTimeout(tick.timer);
     tick.timer = setTimeout(tick, 1000 - (Date.now() % 1000) + 5);
 }

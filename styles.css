@@ -1,4 +1,6 @@
-:root {
+:root, [data-theme="dark"] {
+    --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --on-accent: #fff;
     --bg: #0a0e1a;
     --bg-glow-1: rgba(99, 102, 241, 0.18);
     --bg-glow-2: rgba(20, 184, 166, 0.12);
@@ -24,32 +26,82 @@
     color-scheme: dark;
 }
 
-@media (prefers-color-scheme: light) {
-    :root {
-        --bg: #f3f5fa;
-        --bg-glow-1: rgba(99, 102, 241, 0.14);
-        --bg-glow-2: rgba(20, 184, 166, 0.1);
-        --card: rgba(255, 255, 255, 0.75);
-        --card-strong: #fff;
-        --border: rgba(15, 23, 42, 0.08);
-        --text: #111827;
-        --muted: #5b6477;
-        --faint: #9aa2b4;
-        --accent: #4f5fe0;
-        --accent-soft: rgba(79, 95, 224, 0.1);
-        --danger: #d83a52;
+[data-theme="light"] {
+    --bg: #f3f5fa;
+    --bg-glow-1: rgba(99, 102, 241, 0.14);
+    --bg-glow-2: rgba(20, 184, 166, 0.1);
+    --card: rgba(255, 255, 255, 0.75);
+    --card-strong: #fff;
+    --border: rgba(15, 23, 42, 0.08);
+    --text: #111827;
+    --muted: #5b6477;
+    --faint: #9aa2b4;
+    --accent: #4f5fe0;
+    --accent-soft: rgba(79, 95, 224, 0.1);
+    --danger: #d83a52;
 
-        --work: #059669;
-        --work-bg: rgba(16, 185, 129, 0.13);
-        --edge: #b45309;
-        --edge-bg: rgba(245, 158, 11, 0.13);
-        --night: #6366f1;
-        --night-bg: rgba(99, 102, 241, 0.05);
+    --work: #059669;
+    --work-bg: rgba(16, 185, 129, 0.13);
+    --edge: #b45309;
+    --edge-bg: rgba(245, 158, 11, 0.13);
+    --night: #6366f1;
+    --night-bg: rgba(99, 102, 241, 0.05);
 
-        --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 32px -16px rgba(15, 23, 42, 0.18);
-        color-scheme: light;
-    }
+    --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 32px -16px rgba(15, 23, 42, 0.18);
+    color-scheme: light;
 }
+
+[data-theme="hacker"] {
+    --font: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    --bg: #000;
+    --bg-glow-1: rgba(0, 255, 65, 0.07);
+    --bg-glow-2: transparent;
+    --card: rgba(0, 20, 6, 0.6);
+    --card-strong: #001a07;
+    --border: rgba(0, 255, 65, 0.28);
+    --text: #33ff66;
+    --muted: #1fae48;
+    --faint: #137a31;
+    --accent: #00ff41;
+    --accent-soft: rgba(0, 255, 65, 0.14);
+    --on-accent: #000;
+    --danger: #ff4d4d;
+
+    --work: #00ff41;
+    --work-bg: rgba(0, 255, 65, 0.2);
+    --edge: #9dff00;
+    --edge-bg: rgba(0, 255, 65, 0.08);
+    --night: #137a31;
+    --night-bg: rgba(0, 255, 65, 0.02);
+
+    --radius: 4px;
+    --shadow: 0 0 18px -6px rgba(0, 255, 65, 0.35);
+    color-scheme: dark;
+}
+[data-theme="hacker"] body { text-shadow: 0 0 6px rgba(0, 255, 65, 0.45); }
+[data-theme="hacker"] body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0) 0 2px, rgba(0, 0, 0, 0.22) 2px 3px);
+}
+[data-theme="hacker"] .brand::before { content: "$ "; color: var(--accent); }
+[data-theme="hacker"] .brand-dot { display: none; }
+[data-theme="hacker"] .brand::after {
+    content: "";
+    width: 0.6em;
+    height: 1.1em;
+    background: var(--accent);
+    animation: blink 1s steps(1) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+[data-theme="hacker"] .switch span::after { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+[data-theme="hacker"] .switch input:checked + span::after { background: #000; }
+[data-theme="hacker"] .clock-time { font-weight: 400; letter-spacing: -0.06em; }
+[data-theme="hacker"] .clock::before { box-shadow: 0 0 10px var(--band); }
+[data-theme="hacker"] :is(.icon-btn, .btn, .segmented, .segmented button, .search input, .place, .place-name, .results, .result, td, .chip, td .day, .swatch) { border-radius: 3px; }
 
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -58,7 +110,7 @@ html { -webkit-text-size-adjust: 100%; }
 body {
     margin: 0;
     min-height: 100vh;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: var(--font);
     color: var(--text);
     background:
         radial-gradient(60rem 40rem at 10% -10%, var(--bg-glow-1), transparent 60%),
@@ -153,7 +205,7 @@ h1, h2 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
     border-radius: 12px;
     border: 1px solid transparent;
     background: var(--accent);
-    color: #fff;
+    color: var(--on-accent);
     font: inherit;
     font-weight: 600;
     text-decoration: none;
@@ -498,7 +550,7 @@ tbody tr:not(.now):hover td { filter: brightness(1.25); }
     font-weight: 500;
     cursor: pointer;
 }
-.segmented button[aria-checked="true"] { background: var(--accent); color: #fff; }
+.segmented button[aria-checked="true"] { background: var(--accent); color: var(--on-accent); text-shadow: none; }
 
 .switch { position: relative; display: inline-block; width: 46px; height: 28px; flex: none; }
 .switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 1; }
