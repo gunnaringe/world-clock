@@ -159,6 +159,7 @@ function search(q) {
 // ---------- Settings ----------
 // Same keys and shapes as the first version so saved settings carry over:
 // locations: [{ id, name, timeZone }], hourFormat: "24" | "12", screenFlash: bool.
+// Added since: showLocal, showClocks (bools, see TOGGLES), theme (theme.js).
 
 const defaultLocations = [
     { id: 'clock-trondheim', name: 'Trondheim', timeZone: 'Europe/Oslo' },
@@ -188,8 +189,13 @@ function setLocations(list) {
 
 function getHourFormat() { return localStorage.getItem('hourFormat') === '12' ? '12' : '24'; }
 function setHourFormat(f) { localStorage.setItem('hourFormat', f); }
-function getScreenFlash() { return readJSON('screenFlash', false) === true; }
-function setScreenFlash(on) { localStorage.setItem('screenFlash', JSON.stringify(on)); }
+// On/off settings and their defaults.
+const TOGGLES = { showLocal: false, showClocks: true, screenFlash: false };
+function getToggle(key) {
+    const v = readJSON(key, TOGGLES[key]);
+    return typeof v === 'boolean' ? v : TOGGLES[key];
+}
+function setToggle(key, on) { localStorage.setItem(key, JSON.stringify(on)); }
 
 // ---------- Burn-in protection ----------
 

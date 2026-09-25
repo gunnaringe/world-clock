@@ -310,7 +310,7 @@ h1, h2 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 /* ---------- Planner ---------- */
 
 .planner { padding: clamp(14px, 2vw, 24px); }
-.planner[hidden], .empty[hidden] { display: none; }
+.planner[hidden], .empty[hidden], .clocks[hidden] { display: none; }
 
 .planner-head {
     display: flex;
@@ -518,6 +518,18 @@ tbody tr:not(.now):hover td { filter: brightness(1.25); }
 .place-time { font-variant-numeric: tabular-nums; }
 .place-actions { display: flex; gap: 4px; }
 .empty-list { margin: 16px 0 0; text-align: center; }
+
+.footer { display: flex; justify-content: center; padding: 8px 0 0; }
+.footer a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+.footer a:hover { color: var(--text); }
+.footer svg { width: 16px; height: 16px; }
 
 .row {
     display: flex;

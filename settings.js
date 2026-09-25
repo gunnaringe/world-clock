@@ -2,7 +2,6 @@ const searchEl = document.getElementById('search');
 const resultsEl = document.getElementById('results');
 const placesEl = document.getElementById('places');
 const placesEmptyEl = document.getElementById('places-empty');
-const flashEl = document.getElementById('flash');
 
 let places = getLocations();
 let results = [];
@@ -199,14 +198,20 @@ for (const b of document.querySelectorAll('[data-theme-choice]')) {
     });
 }
 
-flashEl.checked = getScreenFlash();
-flashEl.addEventListener('change', () => setScreenFlash(flashEl.checked));
+function renderToggles() {
+    for (const input of document.querySelectorAll('[data-toggle]')) input.checked = getToggle(input.dataset.toggle);
+}
+
+for (const input of document.querySelectorAll('[data-toggle]')) {
+    input.addEventListener('change', () => setToggle(input.dataset.toggle, input.checked));
+}
 document.getElementById('preview').addEventListener('click', runFlashSequence);
 
 renderFormat();
 renderTheme();
+renderToggles();
 renderPlaces();
 setInterval(tickMeta, 5000);
 addEventListener('pageshow', (e) => {
-    if (e.persisted) { places = getLocations(); renderPlaces(); renderFormat(); renderTheme(); flashEl.checked = getScreenFlash(); }
+    if (e.persisted) { places = getLocations(); renderPlaces(); renderFormat(); renderTheme(); renderToggles(); }
 });

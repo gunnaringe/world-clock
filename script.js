@@ -129,6 +129,10 @@ function tick() {
 
 function renderAll() {
     locations = getLocations();
+    // "Show your time zone": add it first unless one of the places already is.
+    if (getToggle('showLocal') && !locations.some((l) => canon(l.timeZone) === LOCAL)) {
+        locations.unshift({ name: cityOf(LOCAL), timeZone: LOCAL });
+    }
     h12 = getHourFormat() === '12';
     emptyEl.hidden = locations.length > 0;
     plannerEl.hidden = locations.length === 0;
@@ -137,7 +141,8 @@ function renderAll() {
     tick();
 
     clearInterval(renderAll.flash);
-    if (getScreenFlash()) renderAll.flash = setInterval(runFlashSequence, 30 * 60e3);
+    clocksEl.hidden = !getToggle('showClocks');
+    if (getToggle('screenFlash')) renderAll.flash = setInterval(runFlashSequence, 30 * 60e3);
 }
 
 renderAll();
