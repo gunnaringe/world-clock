@@ -52,7 +52,16 @@ const ALIASES = [
     ['Cape Town', 'Africa/Johannesburg'], ['Kathmandu', 'Asia/Kathmandu'],
 ];
 
+// Browsers still report some zones by old IDs (Chrome: Asia/Calcutta); show
+// today's city names for those.
+const RENAMED = {
+    'Asia/Calcutta': 'Kolkata', 'Asia/Saigon': 'Ho Chi Minh City', 'Asia/Katmandu': 'Kathmandu',
+    'Asia/Rangoon': 'Yangon', 'Europe/Kiev': 'Kyiv', 'Asia/Ulan_Bator': 'Ulaanbaatar',
+    'America/Godthab': 'Nuuk', 'Atlantic/Faeroe': 'Faroe Islands', 'Asia/Dacca': 'Dhaka',
+};
+
 function cityOf(zone) {
+    if (RENAMED[zone]) return RENAMED[zone];
     const fixed = /^Etc\/GMT([+-]\d+)$/.exec(zone);
     if (fixed) return offsetLabel(-60 * Number(fixed[1]));
     if (zone === 'UTC' || zone === 'Etc/UTC' || zone === 'Etc/GMT') return 'UTC';
@@ -182,10 +191,15 @@ function search(q) {
 // (theme.js), lang (i18n.js), protection (PROTECTIONS; replaces screenFlash),
 // hours (DEFAULT_HOURS shape) and per-location `hours` overriding it.
 
-const defaultLocations = [
-    { id: 'clock-trondheim', name: 'Trondheim', timeZone: 'Europe/Oslo' },
-    { id: 'clock-san-jose', name: 'San Jose', timeZone: 'America/Los_Angeles' },
-];
+// First visit: your own city, then New York, Berlin and Kolkata (skipping
+// any that share your time zone).
+function defaultLocations() {
+    const list = [{ name: cityOf(LOCAL), timeZone: LOCAL }];
+    for (const [name, timeZone] of [['New York', 'America/New_York'], ['Berlin', 'Europe/Berlin'], ['Kolkata', 'Asia/Kolkata']]) {
+        if (canon(timeZone) && !list.some((l) => canon(l.timeZone) === canon(timeZone))) list.push({ name, timeZone });
+    }
+    return list;
+}
 
 function readJSON(key, fallback) {
     try {
@@ -198,7 +212,7 @@ function readJSON(key, fallback) {
 
 function getLocations() {
     const list = readJSON('locations', null);
-    return (Array.isArray(list) ? list : defaultLocations)
+    return (Array.isArray(list) ? list : defaultLocations())
         .filter((l) => l && canon(l.timeZone))
         .map((l) => ({
             name: String(l.name || '').trim() || cityOf(l.timeZone),
@@ -219,7 +233,7 @@ function getHourFormat() { return localStorage.getItem('hourFormat') === '12' ? 
 function setHourFormat(f) { localStorage.setItem('hourFormat', f); }
 
 // On/off settings and their defaults.
-const TOGGLES = { showLocal: false, showClocks: true, seconds: false };
+const TOGGLES = { showLocal: true, showClocks: true, seconds: false };
 function getToggle(key) {
     const v = readJSON(key, TOGGLES[key]);
     return typeof v === 'boolean' ? v : TOGGLES[key];
@@ -263,7 +277,8 @@ function resetSettings() { for (const k of SETTINGS_KEYS) localStorage.removeIte
 //   h=8-17-7-23   hours: work start-end, awake start-end (whole hours)
 //   f=12          12-hour clock
 //   o=cs          on/off settings that are on: l = show your time zone,
-//                 c = show clocks, s = seconds. Written only if not just `c`.
+//                 c = show clocks, s = seconds. Written only if they differ
+//                 from the defaults (l and c on).
 //   t=hacker      theme: light, dark or hacker (auto if left out)
 //   b=gentle      screen protection: gentle or flash (none if left out)
 //   l=no          language, always written: "auto" is resolved to what the
@@ -307,7 +322,8 @@ function encodeSetup() {
     if (!sameHours(hours, DEFAULT_HOURS)) parts.push('h=' + encHours(hours));
     if (getHourFormat() === '12') parts.push('f=12');
     const opts = Object.keys(OPT_LETTERS).filter((c) => getToggle(OPT_LETTERS[c])).join('');
-    if (opts !== 'c') parts.push('o=' + opts);
+    const defaults = Object.keys(OPT_LETTERS).filter((c) => TOGGLES[OPT_LETTERS[c]]).join('');
+    if (opts !== defaults) parts.push('o=' + opts);
     if (getTheme() !== 'auto') parts.push('t=' + getTheme());
     if (getProtection() !== 'none') parts.push('b=' + getProtection());
     parts.push('l=' + currentLang());

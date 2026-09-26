@@ -43,6 +43,10 @@ Plain keys, compatible with the first version: `locations`
 (reset, share-link import and undo rely on it). Render user text with
 `textContent` — names can come from share links.
 
+First visit (no `locations` key): your own city, New York, Berlin, Kolkata
+(`defaultLocations()`, skipping duplicates of your zone); "show your time
+zone" is on by default.
+
 Hours: whole hours 0–23, ranges `[start, end)` that may wrap midnight; work wins
 over awake, outside awake is night. Defaults 08–17 / 07–23 reproduce the
 original colouring exactly.
@@ -57,7 +61,7 @@ strips the fragment and offers undo.
 ## Time zones
 
 - Compare zones via `canon()` — Chrome reports legacy IDs (`Asia/Calcutta` for
-  `Asia/Kolkata`).
+  `Asia/Kolkata`). Display names for such legacy IDs come from `RENAMED`.
 - Offsets come from `longOffset` so half-hour zones work; day labels compare
   calendar dates, not offsets.
 - `Etc/GMT-5` is UTC**+5** (POSIX sign flip).
