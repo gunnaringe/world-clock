@@ -5,8 +5,9 @@ screens left running for weeks; phones and laptops second.
 
 ## Layout
 
-No build, no dependencies, no third-party requests (system fonts), so it works
-offline. Keep it that way.
+No build, no dependencies, no third-party requests (system fonts, plus
+self-hosted VT323 in `fonts/` for the hacker theme — SIL OFL, keep
+`fonts/OFL-VT323.txt`), so it works offline. Keep it that way.
 
 - `index.html` + `script.js` — clocks and the 24-hour table.
 - `settings.html` + `settings.js` — settings page.
