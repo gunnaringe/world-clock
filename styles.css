@@ -715,7 +715,7 @@ body.idle { cursor: none; }
 
 @media (min-width: 900px) and (min-height: 560px) {
     html { font-size: clamp(16px, 1.5vh, 40px); }
-    body { height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+    body:not(.settings-page) { height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
     .topbar, .wrap { max-width: none; width: 100%; }
     .topbar { padding: 1.6vh 2.4vw 0.6vh; }

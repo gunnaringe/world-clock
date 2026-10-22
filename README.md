@@ -28,6 +28,9 @@ and evening, and night. Made for office wall screens as much as for phones.
 
 For a screen that should start on its own, open the page in kiosk mode, e.g.
 `chromium --kiosk https://clock.apphub.casa/#…` with a shared setup link.
+For screens without touch or a mouse (digital signage, e.g. a Webex device),
+turn on **Signage mode** before copying the link: the buttons and pointer stay
+hidden, and loading the same link again on every start shows no message.
 
 ## Development
 
