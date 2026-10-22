@@ -2,7 +2,11 @@
 //
 // Everything is network-first: a deploy shows up on the next load, and the
 // cached copy is only used offline. (Cache-first would pair a new page with
-// old scripts for one load, since the app is several files.)
+// old scripts for one load, since the app is several files.) Network-first
+// also has to get past the browser's HTTP cache: on clock.apphub.casa,
+// Cloudflare's zone Browser Cache TTL turns Pages' max-age=0 into 4 hours for
+// CSS and JS (not HTML), so files are fetched with cache: 'no-cache', i.e.
+// always revalidated (a cheap 304 when unchanged).
 //
 // Cloudflare Pages serves "pretty" URLs: /index.html redirects to / and
 // /settings.html to /settings. Cache keys are normalised the same way, so the
@@ -64,7 +68,8 @@ self.addEventListener('fetch', (e) => {
 
     e.respondWith((async () => {
         try {
-            const res = await fetch(req);
+            // Navigations can't be re-created as a new Request, and HTML is max-age=0 anyway.
+            const res = await fetch(req.mode === 'navigate' ? req : new Request(req, { cache: 'no-cache' }));
             // Navigations get redirect mode "manual": a Pages redirect comes
             // back as an opaque redirect for the browser to follow. Not cached.
             if (res.ok && res.type !== 'opaqueredirect') {
