@@ -187,7 +187,7 @@ function search(q) {
 // ---------- Settings ----------
 // Same keys and shapes as the first version so saved settings carry over:
 // locations: [{ id, name, timeZone }], hourFormat: "24" | "12", screenFlash: bool.
-// Added since: showLocal, showClocks, seconds (bools, see TOGGLES), theme
+// Added since: showLocal, showClocks, seconds, signage (bools, see TOGGLES), theme
 // (theme.js), lang (i18n.js), protection (PROTECTIONS; replaces screenFlash),
 // hours (DEFAULT_HOURS shape) and per-location `hours` overriding it.
 
@@ -233,7 +233,7 @@ function getHourFormat() { return localStorage.getItem('hourFormat') === '12' ? 
 function setHourFormat(f) { localStorage.setItem('hourFormat', f); }
 
 // On/off settings and their defaults.
-const TOGGLES = { showLocal: true, showClocks: true, seconds: false };
+const TOGGLES = { showLocal: true, showClocks: true, seconds: false, signage: false };
 function getToggle(key) {
     const v = readJSON(key, TOGGLES[key]);
     return typeof v === 'boolean' ? v : TOGGLES[key];
@@ -256,7 +256,7 @@ const THEMES = ['auto', 'light', 'dark', 'hacker'];
 function getTheme() { const v = localStorage.getItem('theme'); return THEMES.includes(v) ? v : 'auto'; }
 
 const SETTINGS_KEYS = ['locations', 'hourFormat', 'screenFlash', 'protection', 'showLocal', 'showClocks',
-    'seconds', 'theme', 'lang', 'hours'];
+    'seconds', 'signage', 'theme', 'lang', 'hours'];
 function resetSettings() { for (const k of SETTINGS_KEYS) localStorage.removeItem(k); }
 
 // ---------- Share links ----------
@@ -277,8 +277,9 @@ function resetSettings() { for (const k of SETTINGS_KEYS) localStorage.removeIte
 //   h=8-17-7-23   hours: work start-end, awake start-end (whole hours)
 //   f=12          12-hour clock
 //   o=cs          on/off settings that are on: l = show your time zone,
-//                 c = show clocks, s = seconds. Written only if they differ
-//                 from the defaults (l and c on).
+//                 c = show clocks, s = seconds, k = signage (no buttons or
+//                 pointer; for screens nobody touches). Written only if they
+//                 differ from the defaults (l and c on).
 //   t=hacker      theme: light, dark or hacker (auto if left out)
 //   b=gentle      screen protection: gentle or flash (none if left out)
 //   l=no          language, always written: "auto" is resolved to what the
@@ -289,7 +290,7 @@ function resetSettings() { for (const k of SETTINGS_KEYS) localStorage.removeIte
 // trim trailing `.!)'`, so names escape those. Unknown keys, unknown zones and
 // malformed parts are ignored.
 
-const OPT_LETTERS = { l: 'showLocal', c: 'showClocks', s: 'seconds' };
+const OPT_LETTERS = { l: 'showLocal', c: 'showClocks', s: 'seconds', k: 'signage' };
 
 const encName = (n) => encodeURIComponent(n)
     .replace(/[!'()*._~]/g, (ch) => '%' + ch.charCodeAt(0).toString(16).toUpperCase())

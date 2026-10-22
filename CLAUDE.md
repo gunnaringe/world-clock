@@ -37,7 +37,7 @@ when touching the service worker.
 
 Plain keys, compatible with the first version: `locations`
 (`[{ id, name, timeZone, hours? }]`), `hourFormat` (`"24"`/`"12"`),
-`showLocal`, `showClocks`, `seconds` (JSON bools, defaults in `TOGGLES`),
+`showLocal`, `showClocks`, `seconds`, `signage` (JSON bools, defaults in `TOGGLES`),
 `protection` (`none`/`gentle`/`flash`; the old `screenFlash: true` reads as
 `flash`), `theme` (`auto`/`light`/`dark`/`hacker`), `lang` (`auto`/`en`/`no`),
 `hours` (`DEFAULT_HOURS` shape). Every key must be listed in `SETTINGS_KEYS`

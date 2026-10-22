@@ -311,6 +311,7 @@ function renderAll() {
     tick();
     applyProtection();
     syncFullscreenLabel();
+    syncIdle();
 }
 
 // ---------- Shared setup links ----------
@@ -321,9 +322,13 @@ function takeHash() {
     const values = decodeSetup(location.hash.slice(1));
     history.replaceState(null, '', location.href.split('#')[0]);
     if (!values) return;
+    // Signage loads the same link on every start, so say nothing when it
+    // changes nothing; and a signage screen has nobody to press Undo.
+    const changed = Object.keys(values).some((k) => values[k] !== localStorage.getItem(k));
     const before = writeSettings(values);
     applyTheme();
     renderAll();
+    if (!changed || getToggle('signage')) return;
     showToast(t('imported'), {
         label: t('undo'),
         run: () => { writeSettings(before); applyTheme(); renderAll(); },
@@ -397,12 +402,22 @@ async function syncWakeLock() {
     }
 }
 
-// Hide the top bar and cursor after a few seconds without mouse movement.
+// In fullscreen and in signage mode, hide the top bar and cursor after a few
+// seconds without mouse movement. Signage starts hidden: nobody may ever move
+// a mouse there.
 let idleTimer;
+const hidesControls = () => !!document.fullscreenElement || getToggle('signage');
 function wake() {
     document.body.classList.remove('idle');
     clearTimeout(idleTimer);
     idleTimer = setTimeout(() => document.body.classList.add('idle'), 3000);
+}
+function syncIdle() {
+    clearTimeout(idleTimer);
+    document.body.classList.toggle('idle', getToggle('signage'));
+}
+for (const ev of ['mousemove', 'pointerdown', 'keydown']) {
+    addEventListener(ev, () => { if (hidesControls()) wake(); });
 }
 
 if (root.requestFullscreen) {
@@ -415,12 +430,9 @@ if (root.requestFullscreen) {
         syncFullscreenLabel();
         syncWakeLock();
         if (document.fullscreenElement) wake();
-        else { clearTimeout(idleTimer); document.body.classList.remove('idle'); }
+        else syncIdle();
     });
     document.addEventListener('visibilitychange', syncWakeLock);
-    for (const ev of ['mousemove', 'pointerdown', 'keydown']) {
-        addEventListener(ev, () => { if (document.fullscreenElement) wake(); });
-    }
 }
 
 // ---------- Start ----------
