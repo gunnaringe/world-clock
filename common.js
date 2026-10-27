@@ -186,8 +186,9 @@ function search(q) {
 
 // ---------- Settings ----------
 // Same keys and shapes as the first version so saved settings carry over:
-// locations: [{ id, name, timeZone }], hourFormat: "24" | "12", screenFlash: bool.
-// Added since: showLocal, showClocks, seconds, signage (bools, see TOGGLES), theme
+// locations: [{ id, name, timeZone }], hourFormat: "24" | "12", screenFlash: bool
+// (now read as gentle protection).
+// Added since: showLocal, showClocks, seconds, signage, dim (bools, see TOGGLES), theme
 // (theme.js), lang (i18n.js), protection (PROTECTIONS; replaces screenFlash),
 // hours (DEFAULT_HOURS shape) and per-location `hours` overriding it.
 
@@ -233,19 +234,22 @@ function getHourFormat() { return localStorage.getItem('hourFormat') === '12' ? 
 function setHourFormat(f) { localStorage.setItem('hourFormat', f); }
 
 // On/off settings and their defaults.
-const TOGGLES = { showLocal: true, showClocks: true, seconds: false, signage: false };
+const TOGGLES = { showLocal: true, showClocks: true, seconds: false, signage: false, dim: false };
 function getToggle(key) {
     const v = readJSON(key, TOGGLES[key]);
     return typeof v === 'boolean' ? v : TOGGLES[key];
 }
 function setToggle(key, on) { localStorage.setItem(key, JSON.stringify(on)); }
 
-// Burn-in protection. The first version only had screenFlash (on/off).
-const PROTECTIONS = ['none', 'gentle', 'flash'];
+// Burn-in protection: 'gentle' slowly moves the picture. There used to be a
+// colour flash too ('flash', and before that screenFlash: true); it did
+// nothing against burn-in, so those now read as 'gentle'.
+const PROTECTIONS = ['none', 'gentle'];
 function getProtection() {
     const v = localStorage.getItem('protection');
     if (PROTECTIONS.includes(v)) return v;
-    return readJSON('screenFlash', false) === true ? 'flash' : 'none';
+    if (v === 'flash') return 'gentle';
+    return readJSON('screenFlash', false) === true ? 'gentle' : 'none';
 }
 function setProtection(v) {
     localStorage.setItem('protection', v);
@@ -256,7 +260,7 @@ const THEMES = ['auto', 'light', 'dark', 'hacker'];
 function getTheme() { const v = localStorage.getItem('theme'); return THEMES.includes(v) ? v : 'auto'; }
 
 const SETTINGS_KEYS = ['locations', 'hourFormat', 'screenFlash', 'protection', 'showLocal', 'showClocks',
-    'seconds', 'signage', 'theme', 'lang', 'hours'];
+    'seconds', 'signage', 'dim', 'theme', 'lang', 'hours'];
 function resetSettings() { for (const k of SETTINGS_KEYS) localStorage.removeItem(k); }
 
 // ---------- Share links ----------
@@ -278,10 +282,11 @@ function resetSettings() { for (const k of SETTINGS_KEYS) localStorage.removeIte
 //   f=12          12-hour clock
 //   o=cs          on/off settings that are on: l = show your time zone,
 //                 c = show clocks, s = seconds, k = signage (no buttons or
-//                 pointer; for screens nobody touches). Written only if they
-//                 differ from the defaults (l and c on).
+//                 pointer; for screens nobody touches), d = dim outside working
+//                 hours. Written only if they differ from the defaults (l and c on).
 //   t=hacker      theme: light, dark or hacker (auto if left out)
-//   b=gentle      screen protection: gentle or flash (none if left out)
+//   b=gentle      screen protection: gentle (none if left out; the retired
+//                 b=flash reads as gentle)
 //   l=no          language, always written: "auto" is resolved to what the
 //                 sender sees, so the setup looks the same everywhere.
 //
@@ -290,7 +295,7 @@ function resetSettings() { for (const k of SETTINGS_KEYS) localStorage.removeIte
 // trim trailing `.!)'`, so names escape those. Unknown keys, unknown zones and
 // malformed parts are ignored.
 
-const OPT_LETTERS = { l: 'showLocal', c: 'showClocks', s: 'seconds', k: 'signage' };
+const OPT_LETTERS = { l: 'showLocal', c: 'showClocks', s: 'seconds', k: 'signage', d: 'dim' };
 
 const encName = (n) => encodeURIComponent(n)
     .replace(/[!'()*._~]/g, (ch) => '%' + ch.charCodeAt(0).toString(16).toUpperCase())
@@ -372,7 +377,7 @@ function decodeSetup(hash) {
         } else if (k === 't') {
             if (THEMES.includes(v) && v !== 'auto') out.theme = v;
         } else if (k === 'b') {
-            if (PROTECTIONS.includes(v) && v !== 'none') out.protection = v;
+            if (v === 'gentle' || v === 'flash') out.protection = 'gentle';
         } else if (k === 'l') {
             if (I18N[v]) out.lang = v;
         }
@@ -389,22 +394,6 @@ function writeSettings(values) {
         else localStorage.setItem(k, values[k]);
     }
     return before;
-}
-
-// ---------- Burn-in protection ----------
-
-// A short colour sequence. 400 ms per colour keeps it under ~3 flashes per
-// second (a common photosensitivity guideline).
-function runFlashSequence() {
-    const overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999';
-    document.body.appendChild(overlay);
-    const colors = ['white', 'green', 'blue', 'red', 'black'];
-    let i = 0;
-    const step = () => { overlay.style.background = colors[i++]; };
-    step();
-    const id = setInterval(step, 400);
-    setTimeout(() => { clearInterval(id); overlay.remove(); }, 400 * colors.length);
 }
 
 // ---------- Offline ----------

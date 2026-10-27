@@ -259,6 +259,7 @@ function tick() {
     if (start !== plannerHour) renderPlanner(start);
     tickNowRow(now);
     checkForUpdate(now);
+    applyDim(now);
     clearTimeout(tick.timer);
     tick.timer = setTimeout(tick, 1000 - (Date.now() % 1000) + 5);
 }
@@ -272,22 +273,54 @@ function renderLegend() {
 
 // ---------- Screen protection ----------
 
-const SHIFT_PX = 3;
+// Gentle: the picture wanders up to 1 % of the screen (about 11 px at 1080p,
+// 22 px at 4K) in any direction, one pixel every 30 seconds, so the edges of
+// text, cards and cells don't sit on the same pixels for hours. Too slow to
+// notice; whole pixels so text stays sharp.
+const SHIFT_STEP_MS = 30e3;
 let protectTimer;
+let shift = { x: 0, y: 0 }, shiftTarget = { x: 0, y: 0 };
 function setShift(x, y) {
+    shift = { x, y };
     document.documentElement.style.setProperty('--shift-x', x + 'px');
     document.documentElement.style.setProperty('--shift-y', y + 'px');
 }
+function stepShift() {
+    const max = Math.max(1, Math.round(Math.min(innerWidth, innerHeight) / 100));
+    if (shift.x === shiftTarget.x && shift.y === shiftTarget.y) {
+        const r = () => Math.round((Math.random() * 2 - 1) * max);
+        shiftTarget = { x: r(), y: r() };
+    }
+    const toward = (a, b) => a + Math.sign(b - a);
+    setShift(toward(shift.x, shiftTarget.x), toward(shift.y, shiftTarget.y));
+}
 function applyProtection() {
     clearInterval(protectTimer);
-    setShift(0, 0);
-    const mode = getProtection();
-    if (mode === 'flash') {
-        protectTimer = setInterval(runFlashSequence, 30 * 60e3);
-    } else if (mode === 'gentle') {
-        const r = () => Math.round((Math.random() * 2 - 1) * SHIFT_PX);
-        protectTimer = setInterval(() => setShift(r(), r()), 2 * 60e3);
+    if (getProtection() === 'gentle') {
+        protectTimer = setInterval(stepShift, SHIFT_STEP_MS);
+    } else {
+        setShift(0, 0);
+        shiftTarget = { x: 0, y: 0 };
     }
+}
+
+// Dim outside working hours (and all weekend) on this device's clock. Using
+// the screen brightens it again for a minute.
+const WAKE_MS = 60e3;
+let lastActive = -Infinity;
+function shouldDim(now) {
+    if (!getToggle('dim') || Date.now() - lastActive < WAKE_MS) return false;
+    const day = now.getDay();
+    return day === 0 || day === 6 || !inRange(now.getHours(), hours.workStart, hours.workEnd);
+}
+function applyDim(now = new Date()) {
+    document.body.classList.toggle('dimmed', shouldDim(now));
+}
+for (const ev of ['mousemove', 'pointerdown', 'keydown']) {
+    addEventListener(ev, () => {
+        lastActive = Date.now();
+        if (document.body.classList.contains('dimmed')) applyDim();
+    });
 }
 
 // ---------- Render ----------
@@ -310,6 +343,7 @@ function renderAll() {
     plannerHour = null;
     tick();
     applyProtection();
+    applyDim();
     syncFullscreenLabel();
     syncIdle();
 }

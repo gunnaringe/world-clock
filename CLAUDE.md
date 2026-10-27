@@ -37,10 +37,10 @@ when touching the service worker.
 
 Plain keys, compatible with the first version: `locations`
 (`[{ id, name, timeZone, hours? }]`), `hourFormat` (`"24"`/`"12"`),
-`showLocal`, `showClocks`, `seconds`, `signage` (JSON bools, defaults in `TOGGLES`),
-`protection` (`none`/`gentle`/`flash`; the old `screenFlash: true` reads as
-`flash`), `theme` (`auto`/`light`/`dark`/`hacker`), `lang` (`auto`/`en`/`no`),
-`hours` (`DEFAULT_HOURS` shape). Every key must be listed in `SETTINGS_KEYS`
+`showLocal`, `showClocks`, `seconds`, `signage`, `dim` (JSON bools, defaults
+in `TOGGLES`), `protection` (`none`/`gentle`; the retired `flash` and the old
+`screenFlash: true` read as `gentle`), `theme` (`auto`/`light`/`dark`/`hacker`),
+`lang` (`auto`/`en`/`no`), `hours` (`DEFAULT_HOURS` shape). Every key must be listed in `SETTINGS_KEYS`
 (reset, share-link import and undo rely on it). Render user text with
 `textContent` — names can come from share links.
 
@@ -73,9 +73,10 @@ strips the fragment and offers undo.
 ## Service worker
 
 Network-first for everything (the app is several files; cache-first would mix
-new HTML with old JS). The network fetch uses `cache: 'no-cache'`: on clock.apphub.casa
-Cloudflare's zone Browser Cache TTL (4 h) overrides Pages' `max-age=0` for
-CSS/JS, so a plain `fetch` would serve stale files from the HTTP cache. Cache keys are normalised to the pretty URLs; redirected
+new HTML with old JS). The network fetch uses `cache: 'no-cache'`: on
+clock.apphub.casa Cloudflare's zone Browser Cache TTL (4 h) overrides Pages'
+`max-age=0` for CSS/JS, so a plain `fetch` would serve stale files from the
+HTTP cache. Cache keys are normalised to the pretty URLs; redirected
 responses are never served to navigations. Bump `CACHE` only when changing the
 precache list or strategy. Wall screens also reload around 04:00 if the app
 files changed (`checkForUpdate` in `script.js`) — add new app files to both
