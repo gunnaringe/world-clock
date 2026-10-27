@@ -18,7 +18,8 @@ and evening, and night. Made for office wall screens as much as for phones.
 - ⏰ **Daylight-saving heads-up** — places whose clocks change within a week say so.
 - 📺 **Fills any screen** — from phones to 4K TVs, no scrolling on large
   screens. Fullscreen button (or `F`) that keeps the screen awake and hides
-  the cursor; optional burn-in protection (gentle pixel shift or colour flash).
+  the cursor; optional burn-in protection (a slow pixel drift, and dimming
+  outside working hours).
   Unattended screens pick up new versions by themselves overnight.
 - 🔗 **Share setup** — one link sets up another screen or device the same way.
 - ⚙️ Themes (auto, light, dark, hacker), 12/24-hour, optional seconds,

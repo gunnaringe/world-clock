@@ -179,8 +179,12 @@ h1, h2 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 
 /* ---------- Top bar ---------- */
 
-/* Gentle screen protection nudges these by a few pixels (--shift-x/y). */
+/* Gentle screen protection slowly moves these by a few pixels (--shift-x/y). */
 .topbar, .wrap { translate: var(--shift-x, 0) var(--shift-y, 0); }
+/* ...without making the page a few pixels wider than the screen. (On html,
+   not body: body's overflow would apply to the whole viewport and stop it
+   scrolling up and down.) */
+html { overflow-x: hidden; }
 
 .topbar {
     display: flex;
@@ -707,6 +711,10 @@ tbody tr.copied td { animation: copied .6s ease-out; }
 .topbar { transition: opacity .4s; }
 body.idle .topbar { opacity: 0; }
 body.idle { cursor: none; }
+
+/* Dim outside working hours: a black veil, so OLED pixels give less light. */
+.dim { position: fixed; inset: 0; z-index: 200; background: #000; opacity: 0; pointer-events: none; transition: opacity 3s; }
+body.dimmed .dim { opacity: 0.6; }
 
 /* ---------- Fill the screen ----------
    On anything laptop-sized and up (wall screens especially) the page fits the

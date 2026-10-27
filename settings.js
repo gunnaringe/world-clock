@@ -274,17 +274,9 @@ const renderLang = segmented('lang-choice', getLangSetting, (v) => {
     localStorage.setItem('lang', v);
     renderAll();
 });
-const renderProtection = segmented('protection', getProtection, (v) => {
-    setProtection(v);
-    renderProtectionNote();
-});
-
-function renderProtectionNote() {
-    const mode = getProtection();
-    document.getElementById('protection-note').textContent =
-        t({ none: 'protNoneNote', gentle: 'protGentleNote', flash: 'protFlashNote' }[mode]);
-    document.getElementById('preview').hidden = mode !== 'flash';
-}
+const protectionEl = document.getElementById('protection');
+protectionEl.addEventListener('change', () => setProtection(protectionEl.checked ? 'gentle' : 'none'));
+function renderProtection() { protectionEl.checked = getProtection() === 'gentle'; }
 
 function renderToggles() {
     for (const input of document.querySelectorAll('[data-toggle]')) input.checked = getToggle(input.dataset.toggle);
@@ -293,8 +285,6 @@ function renderToggles() {
 for (const input of document.querySelectorAll('[data-toggle]')) {
     input.addEventListener('change', () => setToggle(input.dataset.toggle, input.checked));
 }
-
-document.getElementById('preview').addEventListener('click', runFlashSequence);
 
 // ---------- Share and reset ----------
 
@@ -334,7 +324,6 @@ function renderAll() {
     renderTheme();
     renderLang();
     renderProtection();
-    renderProtectionNote();
     renderToggles();
     renderGlobalHours();
     renderPlaces();
