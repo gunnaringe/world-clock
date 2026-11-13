@@ -14,8 +14,8 @@ and evening, and night. Made for office wall screens as much as for phones.
   zones and daylight-saving changes handled. Click a row to select it, and another
   to select the hours between (or shift-click, or drag). Copy the times
   (`15:00–17:00 Trondheim · 06:00–08:00 San Jose · 19:30–21:30 Bangalore`)
-  or share them as a link: it shows the time in the recipient's places
-  without changing their setup.
+  or share them as a link, picking which places to include: it shows the
+  time in the recipient's places without changing their setup.
 - 🎨 **Adjustable hours** — set working and awake hours for all places, or per
   place (night shifts across midnight work too).
 - ⏰ **Daylight-saving heads-up** — places whose clocks change within a week say so.

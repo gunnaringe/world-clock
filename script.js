@@ -208,7 +208,7 @@ function rowText(tr) {
 
 // "15:00–17:00 Trondheim · 06:00–08:00 San Jose · 19:30–21:30 Kolkata (Fri 14)".
 function spanText(from, to, places) {
-    const a = new Date(from), b = new Date(to);
+    const a = new Date(from), b = to ? new Date(to) : null;
     const local = wall(LOCAL, a);
     return places.map((loc) => {
         const w = wall(loc.timeZone, a);
@@ -321,16 +321,60 @@ async function copySelection() {
     }
 }
 
-// Phones get the share sheet; everything else copies the link.
-async function shareSelection() {
+// Share dialog: pick which of your places go into the link. Places left out
+// stay left out (by zone) until the page is reloaded.
+const shareDialog = document.getElementById('share-dialog');
+const shareNativeBtn = document.getElementById('share-native');
+const shareLeftOut = new Set();
+let shareSpan = null; // { start, hours, end }
+
+function sharePlaces() {
+    return locations.filter((l) => !shareLeftOut.has(canon(l.timeZone)));
+}
+function shareLink() {
+    return timeUrl(shareSpan.start, shareSpan.hours, sharePlaces());
+}
+function syncShareDialog() {
+    document.getElementById('share-url').textContent = shareLink();
+}
+
+function openShare() {
     if (!sel) return;
     const r = selRange();
     const hours = r[0] === r[1] ? 0 : (r[1] - r[0]) / 3600e3 + 1;
-    const url = timeUrl(hours ? r[0] : selStart().getTime(), hours, locations);
-    if (navigator.share && matchMedia('(pointer: coarse)').matches) {
-        try { await navigator.share({ url, text: selText() }); } catch {}
-        return;
-    }
+    const start = hours ? r[0] : selStart().getTime();
+    shareSpan = { start, hours, end: hours ? r[1] + 3600e3 : 0 };
+    const a = new Date(start), b = hours ? new Date(shareSpan.end) : null;
+    const date = fmt('sdate|' + locale(), () => new Intl.DateTimeFormat(locale(), {
+        weekday: 'short', day: 'numeric', month: 'short',
+    })).format(a);
+    document.getElementById('share-span').textContent =
+        date + ', ' + t('yourTimeSuffix', { time: spanClock(LOCAL, a, b) });
+    const local = wall(LOCAL, a);
+    document.getElementById('share-places').replaceChildren(...locations.map((loc) => {
+        const zone = canon(loc.timeZone);
+        const li = el('li');
+        const label = el('label', 'share-place');
+        const box = el('input');
+        box.type = 'checkbox';
+        box.checked = !shareLeftOut.has(zone);
+        box.addEventListener('change', () => {
+            if (box.checked) shareLeftOut.delete(zone); else shareLeftOut.add(zone);
+            syncShareDialog();
+        });
+        label.append(box, el('span', 'sp-name', loc.name), el('span', 'sp-time', spanClock(loc.timeZone, a, b)));
+        if (dayDiff(wall(loc.timeZone, a), local)) label.append(el('span', 'day', dayFmt(loc.timeZone).format(a)));
+        li.append(label);
+        return li;
+    }));
+    shareNativeBtn.hidden = !navigator.share;
+    syncShareDialog();
+    shareDialog.showModal();
+}
+
+document.getElementById('share-copy').addEventListener('click', async () => {
+    const url = shareLink();
+    shareDialog.close();
     flashSelection();
     try {
         await navigator.clipboard.writeText(url);
@@ -338,10 +382,19 @@ async function shareSelection() {
     } catch {
         showToast(t('copyThisLink') + ' ' + url, null, 15000);
     }
-}
+});
+shareNativeBtn.addEventListener('click', async () => {
+    const text = spanText(shareSpan.start, shareSpan.end, sharePlaces());
+    try {
+        await navigator.share({ url: shareLink(), text });
+        shareDialog.close();
+    } catch {}
+});
+// A click on the backdrop closes the dialog.
+shareDialog.addEventListener('click', (e) => { if (e.target === shareDialog) shareDialog.close(); });
 
 document.getElementById('sel-copy').addEventListener('click', copySelection);
-document.getElementById('sel-share').addEventListener('click', shareSelection);
+document.getElementById('sel-share').addEventListener('click', openShare);
 document.getElementById('sel-clear').addEventListener('click', () => setSel(null));
 
 let drag = null, dragged = false;
@@ -382,6 +435,7 @@ bodyEl.addEventListener('keydown', (e) => {
     }
 });
 addEventListener('keydown', (e) => {
+    if (shareDialog.open) return; // Esc there closes the dialog, nothing more
     if (e.key === 'Escape' && sel) setSel(null);
     else if ((e.key === 'c' || e.key === 'C') && (e.ctrlKey || e.metaKey) && sel
         && !String(getSelection()).trim() && !e.target.closest('input, textarea')) {

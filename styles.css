@@ -503,6 +503,48 @@ body.idle .selbar { opacity: 0; }
 }
 @media (max-width: 359px) { .selbar-text { display: none; } }
 
+/* Share dialog: which places go into the link. */
+.share-dialog {
+    width: min(440px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+    padding: 20px;
+    color: var(--text);
+    background: linear-gradient(var(--card-strong), var(--card-strong)), var(--bg);
+    box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.5);
+}
+.share-dialog::backdrop { background: rgba(0, 0, 0, 0.45); }
+.share-dialog h2 { font-size: 1.05rem; }
+.share-span { margin: 4px 0 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.share-dialog .hint { margin: 12px 0 8px; }
+.share-places { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+.share-place {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+.share-place:hover { background: var(--card); }
+.share-place input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
+.share-place .sp-name { flex: 1; color: var(--text); }
+.share-place .sp-time { font-weight: 600; font-variant-numeric: tabular-nums; }
+.share-place .day { margin-left: 0; }
+.share-place:has(input:not(:checked)) :is(.sp-name, .sp-time, .day) { opacity: 0.45; }
+.share-url {
+    margin: 12px 0 0;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--muted);
+    font: 0.75rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    overflow-wrap: anywhere;
+    user-select: all;
+}
+.share-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.share-actions .btn[hidden] { display: none; }
+.btn:disabled { opacity: .4; cursor: default; }
+
 /* A shared time from someone's link. */
 .shared {
     margin: 0 4px 12px;
