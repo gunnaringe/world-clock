@@ -29,6 +29,7 @@
     --faint: #5c6479;
     --accent: #8b9dff;
     --accent-soft: rgba(139, 157, 255, 0.16);
+    --sel: rgba(139, 157, 255, 0.3);
     --danger: #ff7a8a;
 
     --work: #34d399;
@@ -55,6 +56,7 @@
     --faint: #9aa2b4;
     --accent: #4f5fe0;
     --accent-soft: rgba(79, 95, 224, 0.1);
+    --sel: rgba(79, 95, 224, 0.2);
     --danger: #d83a52;
 
     --work: #059669;
@@ -81,6 +83,7 @@
     --faint: #137a31;
     --accent: #00ff41;
     --accent-soft: rgba(0, 255, 65, 0.14);
+    --sel: rgba(0, 255, 65, 0.28);
     --on-accent: #000;
     --danger: #ff4d4d;
 
@@ -443,11 +446,125 @@ tr.now td:first-child::before {
     color: var(--accent);
 }
 
-tbody tr { cursor: copy; outline: none; }
+tbody { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+tbody tr { cursor: pointer; outline: none; }
 tbody tr:not(.now):hover td { filter: brightness(1.25); }
 tbody tr:focus-visible td { box-shadow: inset 0 0 0 1.5px var(--accent); }
 tbody tr.copied td { animation: copied .6s ease-out; }
 @keyframes copied { from { background: var(--accent-soft); box-shadow: inset 0 0 0 1.5px var(--accent); } }
+
+/* Selected hours: tinted, ringed and bold, with a bar down the left of the
+   block; the other rows fade back so the block stands out from across a room. */
+tbody td { transition: opacity .15s; }
+tbody.has-sel tr:not(.sel) td { opacity: 0.5; }
+tbody tr.sel td {
+    background-image: linear-gradient(var(--sel), var(--sel));
+    box-shadow: inset 0 0 0 2px var(--accent);
+    color: var(--text);
+    font-weight: 700;
+}
+tbody tr.sel td:first-child::after {
+    content: "";
+    position: absolute;
+    left: -4px;
+    top: -2px;
+    bottom: -2px;
+    width: 4px;
+    background: var(--accent);
+}
+tbody tr.sel-first td:first-child::after { top: 0; border-top-left-radius: 4px; }
+tbody tr.sel-last td:first-child::after { bottom: 0; border-bottom-left-radius: 4px; }
+[data-theme="hacker"] tbody tr.sel td { box-shadow: inset 0 0 0 2px var(--accent), 0 0 10px -2px var(--accent); }
+
+.selbar { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.selbar[hidden] { display: none; }
+.selbar .btn { white-space: nowrap; }
+.selbar-text { font-weight: 600; font-size: 0.9rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+body.idle .selbar { opacity: 0; }
+
+/* Small screens: the bar floats at the bottom, where a thumb is. */
+@media not all and (min-width: 900px) and (min-height: 560px) {
+    .selbar {
+        position: fixed;
+        z-index: 40;
+        left: 50%;
+        bottom: 16px;
+        transform: translateX(-50%);
+        max-width: calc(100vw - 24px);
+        padding: 8px 8px 8px 14px;
+        border-radius: 14px;
+        border: 1px solid var(--accent);
+        background: linear-gradient(var(--card-strong), var(--card-strong)), var(--bg);
+        box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.5);
+        width: max-content;
+    }
+    body:has(.selbar:not([hidden])) .wrap { padding-bottom: 88px; }
+    body:has(.selbar:not([hidden])) .toast { bottom: 84px; }
+}
+@media (max-width: 359px) { .selbar-text { display: none; } }
+
+/* Share dialog: which places go into the link. */
+.share-dialog {
+    width: min(440px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+    padding: 20px;
+    color: var(--text);
+    background: linear-gradient(var(--card-strong), var(--card-strong)), var(--bg);
+    box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.5);
+}
+.share-dialog::backdrop { background: rgba(0, 0, 0, 0.45); }
+.share-dialog h2 { font-size: 1.05rem; }
+.share-span { margin: 4px 0 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.share-dialog .hint { margin: 12px 0 8px; }
+.share-places { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+.share-place {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+.share-place:hover { background: var(--card); }
+.share-place input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
+.share-place .sp-name { flex: 1; color: var(--text); }
+.share-place .sp-time { font-weight: 600; font-variant-numeric: tabular-nums; }
+.share-place .day { margin-left: 0; }
+.share-place:has(input:not(:checked)) :is(.sp-name, .sp-time, .day) { opacity: 0.45; }
+.share-url {
+    margin: 12px 0 0;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--muted);
+    font: 0.75rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    overflow-wrap: anywhere;
+    user-select: all;
+}
+.share-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.share-actions .btn[hidden] { display: none; }
+.btn:disabled { opacity: .4; cursor: default; }
+
+/* A shared time from someone's link. */
+.shared {
+    margin: 0 4px 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--accent);
+    background: var(--accent-soft);
+}
+.shared[hidden] { display: none; }
+.shared-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.shared-head .icon-btn { margin-left: auto; }
+.shared-when { font-variant-numeric: tabular-nums; }
+.shared-status { color: var(--muted); font-size: 0.88rem; }
+.shared.passed .shared-status { color: var(--danger); }
+.shared-places { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 6px 0 0; padding: 0; list-style: none; font-size: 0.88rem; }
+.shared-places:empty { display: none; }
+.shared-places li { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.sp-time { font-weight: 600; font-variant-numeric: tabular-nums; }
+.sp-name { color: var(--muted); }
+.shared-places .day { margin-left: 0; }
 
 /* ---------- Toast ---------- */
 
