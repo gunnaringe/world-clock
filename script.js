@@ -496,8 +496,25 @@ bodyEl.addEventListener('keydown', (e) => {
 });
 addEventListener('keydown', (e) => {
     if (shareDialog.open) return; // Esc there closes the dialog, nothing more
+    const inTable = bodyEl.contains(document.activeElement);
+    // Esc clears the selection, a second Esc leaves the table.
     if (e.key === 'Escape' && sel) setSel(null);
-    else if ((e.key === 'c' || e.key === 'C') && (e.ctrlKey || e.metaKey) && sel
+    else if (e.key === 'Escape' && inTable) document.activeElement.blur();
+    // From outside the table, an arrow enters it: at the selection if there is
+    // one, otherwise at Now. Shift+arrow selects Now and the next hour at once.
+    else if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !inTable
+        && !e.ctrlKey && !e.metaKey && !e.altKey && bodyEl.firstElementChild
+        && !e.target.closest('input, textarea, select')) {
+        e.preventDefault();
+        const first = bodyEl.firstElementChild;
+        if (e.shiftKey && !sel && first.nextElementSibling) {
+            const next = first.nextElementSibling;
+            setSel({ a: Number(first.dataset.at), b: Number(next.dataset.at) });
+            next.focus();
+        } else {
+            (sel && rowAt(selRange()[0]) || first).focus();
+        }
+    } else if ((e.key === 'c' || e.key === 'C') && (e.ctrlKey || e.metaKey) && sel
         && !String(getSelection()).trim() && !e.target.closest('input, textarea')) {
         e.preventDefault();
         copySelection();
