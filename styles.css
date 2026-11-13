@@ -461,7 +461,8 @@ tbody tr.sel td {
     background-image: linear-gradient(var(--sel), var(--sel));
     box-shadow: inset 0 0 0 2px var(--accent);
     color: var(--text);
-    font-weight: 700;
+    /* Heavier without font-weight, which is wider and would shift the columns. */
+    -webkit-text-stroke: 0.04em currentColor;
 }
 tbody tr.sel td:first-child::after {
     content: "";
@@ -476,10 +477,31 @@ tbody tr.sel-first td:first-child::after { top: 0; border-top-left-radius: 4px; 
 tbody tr.sel-last td:first-child::after { bottom: 0; border-bottom-left-radius: 4px; }
 [data-theme="hacker"] tbody tr.sel td { box-shadow: inset 0 0 0 2px var(--accent), 0 0 10px -2px var(--accent); }
 
-.selbar { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+/* Large screens: the bar covers the legend instead of taking its own room, so
+   the heading keeps its height and the table never moves. */
+.planner-head { position: relative; }
+.selbar {
+    position: absolute;
+    top: 0;
+    right: 4px;
+    bottom: 14px;
+    max-width: calc(100% - 13rem);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 .selbar[hidden] { display: none; }
+.planner-head:has(.selbar:not([hidden])) .legend { visibility: hidden; }
 .selbar .btn { white-space: nowrap; }
-.selbar-text { font-weight: 600; font-size: 0.9rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.selbar-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
 body.idle .selbar { opacity: 0; }
 
 /* Small screens: the bar floats at the bottom, where a thumb is. */
@@ -487,6 +509,8 @@ body.idle .selbar { opacity: 0; }
     .selbar {
         position: fixed;
         z-index: 40;
+        top: auto;
+        right: auto;
         left: 50%;
         bottom: 16px;
         transform: translateX(-50%);

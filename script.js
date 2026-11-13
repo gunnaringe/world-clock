@@ -254,11 +254,9 @@ function paintSelection() {
         tr.setAttribute('aria-selected', on);
     }
     bodyEl.classList.toggle('has-sel', !!r);
-    const show = !!r;
-    if (selbarEl.hidden === show) {
-        selbarEl.hidden = !show;
-        fitTable();
-    }
+    // The bar is out of the layout flow (over the legend, or floating), so
+    // showing it never moves or resizes the table.
+    selbarEl.hidden = !r;
     if (r) {
         const n = (r[1] - r[0]) / 3600e3 + 1;
         document.getElementById('selbar-text').textContent = n === 1
