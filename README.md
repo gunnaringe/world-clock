@@ -13,7 +13,8 @@ and evening, and night. Made for office wall screens as much as for phones.
 - 🗓️ **24-hour planner** — the current hour live, day changes marked, half-hour
   zones and daylight-saving changes handled. Click a row to select it, and another
   to select the hours between (or shift-click, drag with a mouse, or touch and
-  hold, then drag). Copy the times
+  hold, then drag). From the keyboard, an arrow key enters the table, Enter or
+  Space selects, Shift+arrows select hours, and Esc clears, then leaves. Copy the times
   (`15:00–17:00 Trondheim · 06:00–08:00 San Jose · 19:30–21:30 Bangalore`)
   or share them as a link, picking which places to include: it shows the
   time in the recipient's places without changing their setup.
