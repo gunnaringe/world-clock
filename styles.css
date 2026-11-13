@@ -446,7 +446,7 @@ tr.now td:first-child::before {
     color: var(--accent);
 }
 
-tbody { user-select: none; -webkit-user-select: none; }
+tbody { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 tbody tr { cursor: pointer; outline: none; }
 tbody tr:not(.now):hover td { filter: brightness(1.25); }
 tbody tr:focus-visible td { box-shadow: inset 0 0 0 1.5px var(--accent); }

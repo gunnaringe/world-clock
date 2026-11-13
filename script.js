@@ -412,6 +412,68 @@ bodyEl.addEventListener('pointerover', (e) => {
     if (!sel || sel.a !== drag || sel.b !== at) setSel({ a: drag, b: at });
 });
 addEventListener('pointerup', () => { drag = null; });
+
+// Touch: a drag scrolls the page, so selecting by dragging starts with a
+// hold. Touch a row and keep still for HOLD_MS: it's selected; then drag to
+// extend, with the page held still (and scrolled for you near the top and
+// bottom edges). Moving before that is an ordinary scroll.
+const HOLD_MS = 350;
+let hold = null; // { at, x, y, timer, active, px, py, raf }
+function cancelHold() {
+    if (!hold) return;
+    clearTimeout(hold.timer);
+    cancelAnimationFrame(hold.raf);
+    hold = null;
+}
+function holdTrack() {
+    const tr = document.elementFromPoint(hold.px, hold.py)?.closest('#planner-body tr');
+    if (tr) {
+        const at = Number(tr.dataset.at);
+        if (!sel || sel.a !== hold.at || sel.b !== at) setSel({ a: hold.at, b: at });
+    }
+}
+function holdScroll() {
+    if (!hold || !hold.active) return;
+    const edge = 70;
+    const dy = hold.py < edge ? -(edge - hold.py) / 4 : hold.py > innerHeight - edge ? (hold.py - innerHeight + edge) / 4 : 0;
+    if (dy) {
+        scrollBy(0, dy);
+        holdTrack();
+    }
+    hold.raf = requestAnimationFrame(holdScroll);
+}
+bodyEl.addEventListener('touchstart', (e) => {
+    cancelHold();
+    const tr = e.target.closest('tr');
+    if (!tr || e.touches.length !== 1) return;
+    const p = e.touches[0];
+    hold = { at: Number(tr.dataset.at), x: p.clientX, y: p.clientY, px: p.clientX, py: p.clientY, active: false };
+    hold.timer = setTimeout(() => {
+        hold.active = true;
+        dragged = true; // the lift that ends this isn't a click
+        setSel({ a: hold.at, b: hold.at });
+        navigator.vibrate?.(10);
+        hold.raf = requestAnimationFrame(holdScroll);
+    }, HOLD_MS);
+}, { passive: true });
+bodyEl.addEventListener('touchmove', (e) => {
+    if (!hold) return;
+    const p = e.touches[0];
+    if (!hold.active) {
+        if (Math.hypot(p.clientX - hold.x, p.clientY - hold.y) > 10) cancelHold();
+        return;
+    }
+    e.preventDefault();
+    hold.px = p.clientX;
+    hold.py = p.clientY;
+    holdTrack();
+}, { passive: false });
+bodyEl.addEventListener('touchend', (e) => {
+    if (hold?.active) e.preventDefault(); // no click, no long-press menu
+    cancelHold();
+});
+bodyEl.addEventListener('touchcancel', cancelHold);
+bodyEl.addEventListener('contextmenu', (e) => e.preventDefault());
 bodyEl.addEventListener('click', (e) => {
     const tr = e.target.closest('tr');
     if (dragged || !tr) return;
