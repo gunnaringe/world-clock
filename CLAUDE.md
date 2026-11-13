@@ -59,6 +59,16 @@ above them. Links are a **public contract**: only add keys, never change the
 meaning of existing ones. The clock page applies a link once (`takeHash`),
 strips the fragment and offers undo.
 
+Shared times (`encodeTime()` / `decodeTime()`: `w=` start in minutes since
+epoch, `n=` hours, `m=` sender's places) are a separate link kind under the
+same contract: never written to settings, shown in the `#shared` banner, kept
+in the address bar until closed. A link with `w=` is never a setup link.
+
+Selection in the table: `sel` in `script.js` holds row instants, not row
+indexes, so it survives the hourly rebuild (`clampSelection`). The action bar
+sits in the table head on large screens and is moved to `<body>` on small ones
+(the card's `backdrop-filter` breaks `position: fixed` inside it).
+
 ## Time zones
 
 - Compare zones via `canon()` — Chrome reports legacy IDs (`Asia/Calcutta` for

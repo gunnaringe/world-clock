@@ -37,12 +37,31 @@
         <section class="planner card" id="planner">
             <div class="planner-head">
                 <h2 data-i18n="next24"></h2>
+                <div class="selbar" id="selbar" role="toolbar" hidden>
+                    <span class="selbar-text" id="selbar-text"></span>
+                    <button type="button" class="btn small ghost" id="sel-copy" data-i18n="copyTimes"></button>
+                    <button type="button" class="btn small" id="sel-share" data-i18n="shareTime"></button>
+                    <button type="button" class="icon-btn small" id="sel-clear" data-i18n-title="clearSel" data-i18n-aria="clearSel">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+                    </button>
+                </div>
                 <ul class="legend">
                     <li><span class="swatch work"></span><span data-i18n="legendWork"></span> <span class="legend-range" id="legend-work"></span></li>
                     <li><span class="swatch edge"></span><span data-i18n="legendEdge"></span></li>
                     <li><span class="swatch night"></span><span data-i18n="legendNight"></span> <span class="legend-range" id="legend-night"></span></li>
                 </ul>
             </div>
+            <section class="shared" id="shared" hidden>
+                <div class="shared-head">
+                    <span class="chip accent" data-i18n="sharedTime"></span>
+                    <strong class="shared-when" id="shared-when"></strong>
+                    <span class="shared-status" id="shared-status"></span>
+                    <button type="button" class="icon-btn small" id="shared-close" data-i18n-title="close" data-i18n-aria="close">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+                    </button>
+                </div>
+                <ul class="shared-places" id="shared-places"></ul>
+            </section>
             <div class="table-scroll">
                 <table id="planner-table" data-i18n-title="copyHint">
                     <thead><tr id="planner-header"></tr></thead>

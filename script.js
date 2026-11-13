@@ -157,6 +157,8 @@ function renderPlanner(start) {
         rows.push(tr);
     }
     bodyEl.replaceChildren(...rows);
+    clampSelection(start);
+    renderShared();
     fitTable();
 }
 
@@ -204,10 +206,113 @@ function rowText(tr) {
     }).join(' · ');
 }
 
-async function copyRow(tr) {
-    const text = rowText(tr);
-    tr.classList.add('copied');
-    setTimeout(() => tr.classList.remove('copied'), 600);
+// "15:00–17:00 Trondheim · 06:00–08:00 San Jose · 19:30–21:30 Kolkata (Fri 14)".
+function spanText(from, to, places) {
+    const a = new Date(from), b = new Date(to);
+    const local = wall(LOCAL, a);
+    return places.map((loc) => {
+        const w = wall(loc.timeZone, a);
+        const day = dayDiff(w, local) ? ' (' + dayFmt(loc.timeZone).format(a) + ')' : '';
+        return spanClock(loc.timeZone, a, b) + ' ' + loc.name + day;
+    }).join(' · ');
+}
+const spanClock = (zone, a, b) => clockText(wall(zone, a), h12) + (b ? '–' + clockText(wall(zone, b), h12) : '');
+
+// ---------- Selection ----------
+//
+// One block of hours in a row: `sel` holds the instants (ms) of the row it
+// started on and the row at the other end, so it survives the table being
+// rebuilt on the hour. A click selects a row; a click on another row selects
+// the hours between; a click on the only selected row clears it; a click
+// while a block is selected starts over. Shift-click and dragging with a
+// mouse extend; Shift+arrows do the same from the keyboard.
+
+const selbarEl = document.getElementById('selbar');
+let sel = null;
+
+// Large screens: the bar sits in the table heading. Small screens: it floats
+// at the bottom, which needs it outside the card (its backdrop-filter would
+// make `position: fixed` relative to the card).
+const legendEl = document.querySelector('.planner-head .legend');
+function placeSelbar() {
+    if (fillScreen.matches) legendEl.before(selbarEl);
+    else document.body.append(selbarEl);
+}
+fillScreen.addEventListener('change', placeSelbar);
+placeSelbar();
+const selRange = () => sel && [Math.min(sel.a, sel.b), Math.max(sel.a, sel.b)];
+const rowAt = (at) => bodyEl.querySelector('tr[data-at="' + at + '"]');
+
+function paintSelection() {
+    const r = selRange();
+    for (const tr of bodyEl.children) {
+        const at = Number(tr.dataset.at);
+        const on = !!r && at >= r[0] && at <= r[1];
+        tr.classList.toggle('sel', on);
+        tr.classList.toggle('sel-first', on && at === r[0]);
+        tr.classList.toggle('sel-last', on && at === r[1]);
+        tr.setAttribute('aria-selected', on);
+    }
+    bodyEl.classList.toggle('has-sel', !!r);
+    const show = !!r;
+    if (selbarEl.hidden === show) {
+        selbarEl.hidden = !show;
+        fitTable();
+    }
+    if (r) {
+        const n = (r[1] - r[0]) / 3600e3 + 1;
+        document.getElementById('selbar-text').textContent = n === 1
+            ? spanClock(LOCAL, selStart())
+            : spanClock(LOCAL, new Date(r[0]), new Date(r[1] + 3600e3)) + ' · ' + duration(n * 60);
+    }
+}
+
+// The moment a single selected row stands for: the "now" row is right now.
+function selStart() {
+    const r = selRange();
+    const tr = rowAt(r[0]);
+    return tr && tr.classList.contains('now') ? new Date(Math.floor(Date.now() / 60e3) * 60e3) : new Date(r[0]);
+}
+
+function setSel(next) {
+    sel = next;
+    paintSelection();
+}
+
+function clickRow(at, extend) {
+    if (extend && sel) setSel({ a: sel.a, b: at });
+    else if (sel && sel.a === sel.b && !extend) setSel(at === sel.a ? null : { a: sel.a, b: at });
+    else setSel({ a: at, b: at });
+}
+
+// After the table is rebuilt: drop hours that went by, keep the rest.
+function clampSelection(start) {
+    const r = selRange();
+    if (!r) return;
+    const last = start + 23 * 3600e3;
+    if (r[1] < start || r[0] > last) sel = null;
+    else sel = { a: Math.max(r[0], start), b: Math.min(r[1], last) };
+    paintSelection();
+}
+
+function selText() {
+    const r = selRange();
+    return r[0] === r[1] ? rowText(rowAt(r[0])) : spanText(r[0], r[1] + 3600e3, locations);
+}
+
+function flashSelection() {
+    for (const tr of bodyEl.querySelectorAll('tr.sel')) {
+        tr.classList.remove('copied');
+        void tr.offsetWidth;
+        tr.classList.add('copied');
+        setTimeout(() => tr.classList.remove('copied'), 600);
+    }
+}
+
+async function copySelection() {
+    if (!sel) return;
+    const text = selText();
+    flashSelection();
     try {
         await navigator.clipboard.writeText(text);
         showToast(t('copied', { text }));
@@ -216,15 +321,133 @@ async function copyRow(tr) {
     }
 }
 
+// Phones get the share sheet; everything else copies the link.
+async function shareSelection() {
+    if (!sel) return;
+    const r = selRange();
+    const hours = r[0] === r[1] ? 0 : (r[1] - r[0]) / 3600e3 + 1;
+    const url = timeUrl(hours ? r[0] : selStart().getTime(), hours, locations);
+    if (navigator.share && matchMedia('(pointer: coarse)').matches) {
+        try { await navigator.share({ url, text: selText() }); } catch {}
+        return;
+    }
+    flashSelection();
+    try {
+        await navigator.clipboard.writeText(url);
+        showToast(t('linkCopiedToast'));
+    } catch {
+        showToast(t('copyThisLink') + ' ' + url, null, 15000);
+    }
+}
+
+document.getElementById('sel-copy').addEventListener('click', copySelection);
+document.getElementById('sel-share').addEventListener('click', shareSelection);
+document.getElementById('sel-clear').addEventListener('click', () => setSel(null));
+
+let drag = null, dragged = false;
+bodyEl.addEventListener('pointerdown', (e) => {
+    dragged = false;
+    const tr = e.target.closest('tr');
+    drag = tr && e.pointerType === 'mouse' && e.button === 0 && !e.shiftKey ? Number(tr.dataset.at) : null;
+});
+bodyEl.addEventListener('pointerover', (e) => {
+    const tr = e.target.closest('tr');
+    if (drag == null || !tr || !(e.buttons & 1)) return;
+    const at = Number(tr.dataset.at);
+    if (at === drag && !dragged) return;
+    dragged = true;
+    if (!sel || sel.a !== drag || sel.b !== at) setSel({ a: drag, b: at });
+});
+addEventListener('pointerup', () => { drag = null; });
 bodyEl.addEventListener('click', (e) => {
     const tr = e.target.closest('tr');
-    if (tr) copyRow(tr);
+    if (dragged || !tr) return;
+    clickRow(Number(tr.dataset.at), e.shiftKey);
 });
 bodyEl.addEventListener('keydown', (e) => {
-    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('tr')) {
+    const tr = e.target.closest('tr');
+    if (!tr) return;
+    if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        copyRow(e.target);
+        clickRow(Number(tr.dataset.at), e.shiftKey);
+    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        const next = e.key === 'ArrowDown' ? tr.nextElementSibling : tr.previousElementSibling;
+        if (!next) return;
+        e.preventDefault();
+        next.focus();
+        if (e.shiftKey) {
+            const at = Number(tr.dataset.at);
+            setSel({ a: sel ? sel.a : at, b: Number(next.dataset.at) });
+        }
     }
+});
+addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sel) setSel(null);
+    else if ((e.key === 'c' || e.key === 'C') && (e.ctrlKey || e.metaKey) && sel
+        && !String(getSelection()).trim() && !e.target.closest('input, textarea')) {
+        e.preventDefault();
+        copySelection();
+    }
+});
+
+// ---------- A shared time (from someone's link) ----------
+
+const sharedEl = document.getElementById('shared');
+let shared = null;
+
+function renderShared() {
+    sharedEl.hidden = !shared;
+    if (!shared) return;
+    const a = new Date(shared.start);
+    const b = shared.hours ? new Date(shared.start + shared.hours * 3600e3) : null;
+    const date = fmt('sdate|' + locale(), () => new Intl.DateTimeFormat(locale(), {
+        weekday: 'short', day: 'numeric', month: 'short',
+    })).format(a);
+    document.getElementById('shared-when').textContent =
+        date + ', ' + t('yourTimeSuffix', { time: spanClock(LOCAL, a, b) });
+    const now = Date.now();
+    const end = b ? b.getTime() : shared.start + 60e3;
+    const min = Math.round((shared.start - now) / 60e3);
+    document.getElementById('shared-status').textContent =
+        end <= now ? t('hasPassed')
+        : shared.start <= now ? t('happeningNow')
+        : min >= 48 * 60 ? t('inAmount', { amount: Math.floor(min / 1440) + ' ' + t('unitDays') })
+        : t('inAmount', { amount: duration(min) });
+    sharedEl.classList.toggle('passed', end <= now);
+    // The sender's places first, then yours, each zone once; your own zone is
+    // already in the heading.
+    const seen = new Set([LOCAL]);
+    const places = [...shared.places, ...locations].filter((l) => {
+        const z = canon(l.timeZone);
+        if (seen.has(z)) return false;
+        seen.add(z);
+        return true;
+    });
+    const local = wall(LOCAL, a);
+    document.getElementById('shared-places').replaceChildren(...places.map((loc) => {
+        const li = el('li');
+        li.append(el('span', 'sp-time', spanClock(loc.timeZone, a, b)), el('span', 'sp-name', loc.name));
+        if (dayDiff(wall(loc.timeZone, a), local)) li.append(el('span', 'day', dayFmt(loc.timeZone).format(a)));
+        return li;
+    }));
+}
+
+// Select the rows a shared time covers, if they're in the table.
+function selectShared() {
+    if (!shared || plannerHour == null) return;
+    const first = plannerHour, last = plannerHour + 23 * 3600e3;
+    const rowOf = (ms) => first + Math.floor((ms - first) / 3600e3) * 3600e3;
+    const lo = rowOf(shared.start);
+    const hi = shared.hours ? rowOf(shared.start + shared.hours * 3600e3 - 1) : lo;
+    if (hi < first || lo > last) return;
+    setSel({ a: Math.max(lo, first), b: Math.min(hi, last) });
+}
+
+document.getElementById('shared-close').addEventListener('click', () => {
+    shared = null;
+    history.replaceState(null, '', location.href.split('#')[0]);
+    renderShared();
+    setSel(null);
 });
 
 // ---------- Toast ----------
@@ -258,6 +481,11 @@ function tick() {
     const start = startOfLocalHour(now);
     if (start !== plannerHour) renderPlanner(start);
     tickNowRow(now);
+    if (Math.floor(now / 60e3) !== tick.minute) {
+        tick.minute = Math.floor(now / 60e3);
+        if (shared) renderShared();
+        if (sel) paintSelection();
+    }
     checkForUpdate(now);
     applyDim(now);
     clearTimeout(tick.timer);
@@ -353,6 +581,17 @@ function renderAll() {
 // Applies a setup link from the address bar, if any, and strips it.
 function takeHash() {
     if (location.hash.length <= 1) return;
+    // A shared time stays in the address bar until it's closed, so a reload
+    // or a bookmark keeps it.
+    const time = decodeTime(location.hash.slice(1));
+    if (time) {
+        shared = time;
+        renderShared();
+        selectShared();
+        fitTable();
+        if (!fillScreen.matches) sharedEl.scrollIntoView({ block: 'start' });
+        return;
+    }
     const values = decodeSetup(location.hash.slice(1));
     history.replaceState(null, '', location.href.split('#')[0]);
     if (!values) return;

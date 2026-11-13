@@ -315,15 +315,28 @@ const decHours = (v) => {
 };
 const sameHours = (a, b) => encHours(a) === encHours(b);
 
+function encPlace(l, withHours = true) {
+    let tok = encZone(l.timeZone);
+    const hrs = withHours && l.hours;
+    const name = l.name === cityOf(l.timeZone) ? '' : encName(l.name);
+    if (name || hrs) tok += '_' + name;
+    if (hrs) tok += '_' + encHours(l.hours);
+    return tok;
+}
+function decPlace(tok) {
+    const [z, name = '', hrs = ''] = tok.split('_');
+    const zone = decZone(z);
+    if (!canon(zone)) return null;
+    return {
+        name: decName(name).trim().slice(0, 60) || cityOf(zone),
+        timeZone: zone,
+        hours: hrs ? decHours(hrs) : null,
+    };
+}
+
 function encodeSetup() {
     const parts = [];
-    parts.push('p=' + getLocations().map((l) => {
-        let tok = encZone(l.timeZone);
-        const name = l.name === cityOf(l.timeZone) ? '' : encName(l.name);
-        if (name || l.hours) tok += '_' + name;
-        if (l.hours) tok += '_' + encHours(l.hours);
-        return tok;
-    }).join('~'));
+    parts.push('p=' + getLocations().map((l) => encPlace(l)).join('~'));
     const hours = getHours();
     if (!sameHours(hours, DEFAULT_HOURS)) parts.push('h=' + encHours(hours));
     if (getHourFormat() === '12') parts.push('f=12');
@@ -351,16 +364,7 @@ function decodeSetup(hash) {
         const k = part.slice(0, i), v = part.slice(i + 1);
         if (k === 'p') {
             isSetup = true;
-            const places = (v ? v.split('~') : []).map((tok) => {
-                const [z, name = '', hrs = ''] = tok.split('_');
-                const zone = decZone(z);
-                if (!canon(zone)) return null;
-                return {
-                    name: decName(name).trim().slice(0, 60) || cityOf(zone),
-                    timeZone: zone,
-                    hours: hrs ? decHours(hrs) : null,
-                };
-            }).filter(Boolean);
+            const places = (v ? v.split('~') : []).map(decPlace).filter(Boolean);
             out.locations = JSON.stringify(places.map((l, n) => ({
                 id: 'clock-' + n, name: l.name, timeZone: l.timeZone, ...(l.hours && { hours: l.hours }),
             })));
@@ -383,6 +387,41 @@ function decodeSetup(hash) {
         }
     }
     return isSetup ? out : null; // not one of our links without p=
+}
+
+// Shared times: a moment or a block of hours picked in the table, sent to
+// someone else. They use their own keys and never touch the recipient's
+// settings (a link with w= is not a setup link, even with other keys):
+//   w=29751840    start, in whole minutes since 1970-01-01 UTC
+//   n=2           length in whole hours, 1-24; left out for a single moment
+//   m=Europe/Oslo~America/Los+Angeles_San+Jose
+//                 the sender's places, as in p= but without hours
+function encodeTime(start, hours, places) {
+    const parts = ['w=' + Math.floor(start / 60e3)];
+    if (hours) parts.push('n=' + hours);
+    if (places.length) parts.push('m=' + places.map((l) => encPlace(l, false)).join('~'));
+    return parts.join('&');
+}
+
+function timeUrl(start, hours, places) {
+    return new URL('./', location.href).href + '#' + encodeTime(start, hours, places);
+}
+
+// { start: ms, hours: 0-24, places: [{ name, timeZone }] }, or null.
+function decodeTime(hash) {
+    const v = {};
+    for (const part of hash.split('&')) {
+        const i = part.indexOf('=');
+        if (i > 0) v[part.slice(0, i)] = part.slice(i + 1);
+    }
+    if (!/^\d{1,9}$/.test(v.w || '')) return null;
+    const n = Number(v.n);
+    return {
+        start: Number(v.w) * 60e3,
+        hours: Number.isInteger(n) && n >= 1 && n <= 24 ? n : 0,
+        places: (v.m ? v.m.split('~') : []).map(decPlace).filter(Boolean).slice(0, 20)
+            .map(({ name, timeZone }) => ({ name, timeZone })),
+    };
 }
 
 // Writes { key: value|null } to localStorage; returns what was there before.
