@@ -327,9 +327,9 @@
     content: "";
     position: absolute;
     inset: 3px 0 auto;
-    height: max(9px, 1vh);
-    background: url(decor/snow-edge.svg) repeat-x 0 0 / max(54px, 6vh) 100%;
-    opacity: 0.85;
+    height: max(11px, 1.2vh);
+    background: url(decor/snow-edge.svg) repeat-x 0 0 / max(110px, 12vh) 100%;
+    opacity: 0.9;
     pointer-events: none;
 }
 [data-theme="christmas"] .planner { position: relative; }
@@ -353,19 +353,36 @@
     --t: 240px;
     --d: 30s;
     background-image:
-        radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.7), transparent),
-        radial-gradient(2px 2px at 140px 70px, rgba(255, 255, 255, 0.55), transparent),
-        radial-gradient(1.5px 1.5px at 90px 160px, rgba(255, 255, 255, 0.6), transparent),
-        radial-gradient(2px 2px at 200px 200px, rgba(255, 255, 255, 0.5), transparent);
+        radial-gradient(2.5px 2.5px at 20px 30px, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0)),
+        radial-gradient(2px 2px at 140px 70px, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0)),
+        radial-gradient(2px 2px at 90px 160px, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0)),
+        radial-gradient(2.5px 2.5px at 200px 200px, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0)),
+        radial-gradient(1.5px 1.5px at 60px 110px, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0)),
+        radial-gradient(2px 2px at 175px 125px, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0)),
+        radial-gradient(1.5px 1.5px at 220px 15px, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0)),
+        radial-gradient(2px 2px at 40px 215px, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0)),
+        radial-gradient(1.5px 1.5px at 115px 230px, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0));
 }
 .d-snow::after {
     --t: 360px;
     --d: 60s;
-    opacity: 0.6;
+    opacity: 0.75;
     background-image:
-        radial-gradient(3px 3px at 60px 100px, rgba(255, 255, 255, 0.6), transparent),
-        radial-gradient(2.5px 2.5px at 250px 40px, rgba(255, 255, 255, 0.5), transparent),
-        radial-gradient(3px 3px at 310px 260px, rgba(255, 255, 255, 0.5), transparent);
+        radial-gradient(4px 4px at 60px 100px, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0)),
+        radial-gradient(3.5px 3.5px at 250px 40px, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0)),
+        radial-gradient(4px 4px at 310px 260px, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0)),
+        radial-gradient(3px 3px at 150px 320px, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0)),
+        radial-gradient(3.5px 3.5px at 20px 300px, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0)),
+        radial-gradient(3px 3px at 190px 180px, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+}
+/* Snow on the ground along the bottom (the end of the page on phones). */
+.d-bank {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: max(16px, 1.6vh);
+    background: url(decor/snowbank.svg) repeat-x 0 100% / max(240px, 26vh) 100%;
+    opacity: 0.9;
 }
 @keyframes snow { to { translate: 0 var(--t); } }
 
