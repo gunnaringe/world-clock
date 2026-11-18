@@ -136,6 +136,182 @@
 [data-theme="hacker"] .is-local .clock-name::after { border-radius: 2px; }
 [data-theme="hacker"] .switch span::after { border-radius: 1px; }
 
+[data-theme="christmas"] {
+    --bg: #08111f;
+    --bg-glow-1: rgba(255, 205, 110, 0.13);
+    --bg-glow-2: rgba(40, 150, 90, 0.16);
+    --card: rgba(30, 90, 60, 0.14);
+    --card-strong: rgba(30, 90, 60, 0.3);
+    --border: rgba(242, 193, 78, 0.18);
+    --text: #f6f0e0;
+    --muted: #c4b79a;
+    --faint: #85795f;
+    --accent: #e5484d;
+    --accent-soft: rgba(229, 72, 77, 0.18);
+    --sel: rgba(229, 72, 77, 0.3);
+    --danger: #ff8a8a;
+
+    --work: #4cc47e;
+    --work-bg: rgba(76, 196, 126, 0.15);
+    --edge: #f2c14e;
+    --edge-bg: rgba(242, 193, 78, 0.17);
+    --night: #8ea6e6;
+    --night-bg: rgba(142, 166, 230, 0.06);
+    color-scheme: dark;
+}
+[data-theme="christmas"] body {
+    background:
+        radial-gradient(40rem 24rem at 50% -8%, var(--bg-glow-1), transparent 60%),
+        radial-gradient(50rem 36rem at 0% 110%, var(--bg-glow-2), transparent 60%),
+        radial-gradient(50rem 36rem at 100% 110%, var(--bg-glow-2), transparent 60%),
+        var(--bg);
+    background-attachment: fixed;
+}
+/* A gold star for the dot by the name. */
+[data-theme="christmas"] .brand-dot {
+    width: 0.95em;
+    height: 0.95em;
+    border-radius: 0;
+    background: #ffd76a;
+    box-shadow: none;
+    clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+/* Selected hours get a candy-cane stripe. */
+[data-theme="christmas"] tbody tr.sel td {
+    background-image: repeating-linear-gradient(135deg, rgba(229, 72, 77, 0.34) 0 0.5em, rgba(255, 255, 255, 0.08) 0.5em 1em);
+}
+
+/* ---------- Christmas decorations ----------
+   Only on the clock page (index.html has the .decor layers) and only in the
+   Christmas theme. The back layer sits behind everything; the front layer
+   holds only the elves, which peek up into the space below the table. Both
+   ignore the pointer and drift with screen protection like the rest. */
+.decor { display: none; }
+[data-theme="christmas"] .decor {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+    translate: var(--shift-x, 0) var(--shift-y, 0);
+}
+[data-theme="christmas"] body:not(.settings-page) { position: relative; }
+[data-theme="christmas"] .decor.front { z-index: 5; }
+.decor > * { position: absolute; background: no-repeat center / contain; }
+
+/* A light string along the top edge; half the bulbs glow, then the others.
+   A tile is 5 × the height; bulbs sit at 1/8, 3/8, 5/8 and 7/8 of it. */
+.d-lights {
+    --lh: max(16px, 1.9vh);
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--lh);
+    background: url(decor/lights.svg) repeat-x 0 0 / auto 100%;
+    opacity: 0.85;
+}
+.d-lights::before, .d-lights::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(circle at var(--a) 58%, rgba(255, 232, 170, 0.95), transparent calc(var(--lh) * 0.45)),
+        radial-gradient(circle at var(--b) 58%, rgba(255, 232, 170, 0.95), transparent calc(var(--lh) * 0.45));
+    background-size: calc(var(--lh) * 5) 100%;
+    background-repeat: repeat-x;
+    animation: twinkle 3.2s ease-in-out infinite alternate;
+}
+.d-lights::before { --a: 12.5%; --b: 62.5%; }
+.d-lights::after  { --a: 37.5%; --b: 87.5%; animation-delay: -3.2s; }
+@keyframes twinkle { from { opacity: 0.05; } to { opacity: 0.8; } }
+
+/* Between the name and the buttons: the star over the stable, and trees on
+   each side. Sizes for phones and small windows first. */
+.d-star, .d-glow, .d-nativity, .d-tree { left: 50%; translate: -50% 0; }
+.d-star {
+    --s: 18px;
+    top: 2px;
+    width: var(--s);
+    height: var(--s);
+    background: #ffd76a;
+    clip-path: polygon(50% 0, 59% 41%, 100% 50%, 59% 59%, 50% 100%, 41% 59%, 0 50%, 41% 41%);
+}
+.d-glow {
+    --s: 56px;
+    top: calc(11px - var(--s) / 2);
+    width: var(--s);
+    height: var(--s);
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255, 220, 130, 0.5), transparent);
+    animation: shimmer 6s ease-in-out infinite alternate;
+}
+@keyframes shimmer { from { opacity: 0.35; scale: 0.85; } to { opacity: 1; scale: 1.1; } }
+.d-nativity {
+    --h: 40px;
+    top: 18px;
+    width: calc(var(--h) * 2.22);
+    height: var(--h);
+    background-image: url(decor/nativity.svg);
+}
+.d-tree { display: none; width: calc(var(--h) * 0.77); height: var(--h); background-image: url(decor/tree.svg); }
+.d-elf { display: none; background-image: url(decor/elf.svg); }
+
+@media (max-width: 369px) {
+    .d-nativity { display: none; }
+}
+
+/* Fill-the-screen layout: sized by the screen height, like the topbar. */
+@media (min-width: 900px) and (min-height: 560px) {
+    .d-star { --s: 2.3vh; top: 0.2vh; }
+    .d-glow { --s: 7vh; top: calc(1.35vh - var(--s) / 2); }
+    .d-nativity { --h: 4.2vh; top: 1.9vh; }
+    .d-tree { display: block; --h: 4.6vh; top: 1.4vh; }
+    .d-tree.l1 { left: calc(50% - 7.3vh); }
+    .d-tree.r1 { left: calc(50% + 7.3vh); }
+    .d-tree.l2 { --h: 3.3vh; top: 2.7vh; left: calc(50% - 10.6vh); }
+    .d-tree.r2 { --h: 3.3vh; top: 2.7vh; left: calc(50% + 10.6vh); scale: -1 1; }
+    /* Elves peek up into the space under the table, not over it. */
+    .d-elf { display: block; bottom: -0.3vh; height: 3.8vh; width: calc(3.8vh * 90 / 64); }
+    .d-elf.left { left: 9%; }
+    .d-elf.right { right: 9%; scale: -1 1; }
+}
+
+/* Snow: two sheets of flakes falling at different speeds. Each sheet is one
+   tile taller than the page and only moves (no repaints), which keeps small
+   wall-screen devices cool. */
+.d-snow { inset: 0; }
+.d-snow::before, .d-snow::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(-1 * var(--t));
+    bottom: 0;
+    background-size: var(--t) var(--t);
+    animation: snow var(--d) linear infinite;
+}
+.d-snow::before {
+    --t: 240px;
+    --d: 30s;
+    background-image:
+        radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.7), transparent),
+        radial-gradient(2px 2px at 140px 70px, rgba(255, 255, 255, 0.55), transparent),
+        radial-gradient(1.5px 1.5px at 90px 160px, rgba(255, 255, 255, 0.6), transparent),
+        radial-gradient(2px 2px at 200px 200px, rgba(255, 255, 255, 0.5), transparent);
+}
+.d-snow::after {
+    --t: 360px;
+    --d: 60s;
+    opacity: 0.6;
+    background-image:
+        radial-gradient(3px 3px at 60px 100px, rgba(255, 255, 255, 0.6), transparent),
+        radial-gradient(2.5px 2.5px at 250px 40px, rgba(255, 255, 255, 0.5), transparent),
+        radial-gradient(3px 3px at 310px 260px, rgba(255, 255, 255, 0.5), transparent);
+}
+@keyframes snow { to { translate: 0 var(--t); } }
+
+
 *, *::before, *::after { box-sizing: border-box; }
 
 html { -webkit-text-size-adjust: 100%; }
@@ -928,7 +1104,8 @@ body.dimmed .dim { opacity: 0.6; }
 @media (max-width: 560px) {
     .row { flex-direction: column; align-items: stretch; }
     .row-controls { justify-content: space-between; }
-    .segmented { align-self: flex-start; }
+    .segmented { align-self: flex-start; flex-wrap: wrap; max-width: 100%; }
+    .segmented button { padding: 7px 10px; }
     td { min-width: 78px; padding: 6px 8px; font-size: 0.85rem; }
     tr.now td:first-child::before { display: none; }
 }

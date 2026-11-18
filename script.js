@@ -746,7 +746,8 @@ function takeHash() {
 // leaves fullscreen, so don't do it for nothing. If there was no baseline
 // (loaded offline), reload anyway to get off the cached copy.
 
-const APP_FILES = ['./', 'styles.css', 'i18n.js', 'common.js', 'theme.js', 'script.js'];
+const APP_FILES = ['./', 'styles.css', 'i18n.js', 'common.js', 'theme.js', 'script.js',
+    'decor/nativity.svg', 'decor/tree.svg', 'decor/elf.svg', 'decor/lights.svg'];
 let baseline;
 let nextCheck = nextFourAm(new Date());
 

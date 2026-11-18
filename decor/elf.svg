@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 64">
+  <!-- An elf peeking up from the bottom edge, hands on the edge. -->
+  <path d="M22 34C26 14 40 4 60 6c10 1 18 6 20 10-6-2-12-1-16 3 2 4 4 10 4 15Z" fill="#2f9e63"/>
+  <circle cx="81" cy="18" r="5" fill="#fbf4e2"/>
+  <rect x="20" y="30" width="50" height="8" rx="4" fill="#e5484d"/>
+  <path d="M22 44 10 36l13 14ZM68 44l12-8-13 14Z" fill="#f1cfa6"/>
+  <path d="M24 38h42c2 6 2 14 0 26H24c-2-12-2-20 0-26Z" fill="#f1cfa6"/>
+  <circle cx="37" cy="45" r="3.2" fill="#2b2118"/>
+  <circle cx="53" cy="45" r="3.2" fill="#2b2118"/>
+  <circle cx="38" cy="44" r="1" fill="#fff"/>
+  <circle cx="54" cy="44" r="1" fill="#fff"/>
+  <circle cx="31" cy="52" r="3.5" fill="#f08a8a" opacity="0.7"/>
+  <circle cx="59" cy="52" r="3.5" fill="#f08a8a" opacity="0.7"/>
+  <path d="M39 54q6 5 12 0" fill="none" stroke="#2b2118" stroke-width="2" stroke-linecap="round"/>
+  <rect x="6" y="56" width="16" height="9" rx="4.5" fill="#2f9e63"/>
+  <rect x="68" y="56" width="16" height="9" rx="4.5" fill="#2f9e63"/>
+</svg>

@@ -256,7 +256,7 @@ function setProtection(v) {
     localStorage.removeItem('screenFlash');
 }
 
-const THEMES = ['auto', 'light', 'dark', 'hacker'];
+const THEMES = ['auto', 'light', 'dark', 'hacker', 'christmas'];
 function getTheme() { const v = localStorage.getItem('theme'); return THEMES.includes(v) ? v : 'auto'; }
 
 const SETTINGS_KEYS = ['locations', 'hourFormat', 'screenFlash', 'protection', 'showLocal', 'showClocks',
@@ -284,7 +284,7 @@ function resetSettings() { for (const k of SETTINGS_KEYS) localStorage.removeIte
 //                 c = show clocks, s = seconds, k = signage (no buttons or
 //                 pointer; for screens nobody touches), d = dim outside working
 //                 hours. Written only if they differ from the defaults (l and c on).
-//   t=hacker      theme: light, dark or hacker (auto if left out)
+//   t=hacker      theme: light, dark, hacker or christmas (auto if left out)
 //   b=gentle      screen protection: gentle (none if left out; the retired
 //                 b=flash reads as gentle)
 //   l=no          language, always written: "auto" is resolved to what the

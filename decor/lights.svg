@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 24">
+  <!-- One stretch of a light string; repeats along the top of the screen. -->
+  <path d="M0 3Q30 14 60 3Q90 14 120 3" fill="none" stroke="#1d4d33" stroke-width="1.6"/>
+  <g stroke="#3a3a3a" stroke-width="2.4"><path d="M15 7v3M45 7v3M75 7v3M105 7v3"/></g>
+  <ellipse cx="15" cy="14" rx="3.6" ry="5" fill="#e5484d"/>
+  <ellipse cx="45" cy="14" rx="3.6" ry="5" fill="#f2c14e"/>
+  <ellipse cx="75" cy="14" rx="3.6" ry="5" fill="#3fbf6f"/>
+  <ellipse cx="105" cy="14" rx="3.6" ry="5" fill="#5b8def"/>
+</svg>
