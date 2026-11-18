@@ -137,26 +137,26 @@
 [data-theme="hacker"] .switch span::after { border-radius: 1px; }
 
 [data-theme="christmas"] {
-    --bg: #08111f;
-    --bg-glow-1: rgba(255, 205, 110, 0.13);
-    --bg-glow-2: rgba(40, 150, 90, 0.16);
-    --card: rgba(30, 90, 60, 0.14);
-    --card-strong: rgba(30, 90, 60, 0.3);
-    --border: rgba(242, 193, 78, 0.18);
-    --text: #f6f0e0;
-    --muted: #c4b79a;
-    --faint: #85795f;
-    --accent: #e5484d;
-    --accent-soft: rgba(229, 72, 77, 0.18);
-    --sel: rgba(229, 72, 77, 0.3);
+    --bg: #15293f;
+    --bg-glow-1: rgba(255, 210, 120, 0.2);
+    --bg-glow-2: rgba(60, 175, 110, 0.22);
+    --card: rgba(70, 150, 105, 0.16);
+    --card-strong: rgba(70, 150, 105, 0.3);
+    --border: rgba(242, 193, 78, 0.26);
+    --text: #fbf6ea;
+    --muted: #d6cbb0;
+    --faint: #a0957b;
+    --accent: #e8505a;
+    --accent-soft: rgba(232, 80, 90, 0.2);
+    --sel: rgba(232, 80, 90, 0.32);
     --danger: #ff8a8a;
 
-    --work: #4cc47e;
-    --work-bg: rgba(76, 196, 126, 0.15);
-    --edge: #f2c14e;
-    --edge-bg: rgba(242, 193, 78, 0.17);
-    --night: #8ea6e6;
-    --night-bg: rgba(142, 166, 230, 0.06);
+    --work: #5bd08c;
+    --work-bg: rgba(91, 208, 140, 0.2);
+    --edge: #f5c95a;
+    --edge-bg: rgba(245, 201, 90, 0.2);
+    --night: #9fb4ee;
+    --night-bg: rgba(159, 180, 238, 0.1);
     color-scheme: dark;
 }
 [data-theme="christmas"] body {
@@ -255,7 +255,25 @@
     background-image: url(decor/nativity.svg);
 }
 .d-tree { display: none; width: calc(var(--h) * 0.77); height: var(--h); background-image: url(decor/tree.svg); }
-.d-elf { display: none; background-image: url(decor/elf.svg); }
+/* The elves: one swings from the light string, one waves and one shows off
+   a present. Only on large screens, where there's room above and below. */
+.decor svg { display: block; width: 100%; height: 100%; fill: none; stroke: none; overflow: visible; }
+.decor svg * { transform-box: view-box; }
+.d-elf { display: none; }
+.d-elf.swing { transform-origin: 50% 4%; animation: swing 2.8s ease-in-out infinite alternate; }
+.d-elf.wave, .d-elf.gift { animation: bob 4s ease-in-out infinite alternate; }
+.d-elf.gift { animation-delay: -2s; }
+.e-arm { animation: wave 7s ease-in-out infinite; }
+.e-eyes { animation: blink 5s infinite; }
+.d-elf.gift .e-eyes { animation-delay: -2.5s; }
+.e-gift { animation: hop 3.6s ease-in-out infinite; }
+.e-kick { animation: kick 1.4s ease-in-out infinite alternate; }
+@keyframes swing { from { rotate: -9deg; } to { rotate: 9deg; } }
+@keyframes bob { from { translate: 0 0.25vh; } to { translate: 0 -0.2vh; } }
+@keyframes wave { 0%, 50%, 100% { rotate: 0deg; } 56%, 68%, 80% { rotate: -16deg; } 62%, 74% { rotate: 14deg; } }
+@keyframes blink { 0%, 93%, 100% { scale: 1 1; } 96% { scale: 1 0.1; } }
+@keyframes hop { 0%, 60%, 100% { translate: 0 0; } 70% { translate: 0 -7px; } 80% { translate: 0 0; } 87% { translate: 0 -3px; } 94% { translate: 0 0; } }
+@keyframes kick { from { rotate: -22deg; } to { rotate: 8deg; } }
 
 @media (max-width: 369px) {
     .d-nativity { display: none; }
@@ -271,10 +289,14 @@
     .d-tree.r1 { left: calc(50% + 7.3vh); }
     .d-tree.l2 { --h: 3.3vh; top: 2.7vh; left: calc(50% - 10.6vh); }
     .d-tree.r2 { --h: 3.3vh; top: 2.7vh; left: calc(50% + 10.6vh); scale: -1 1; }
-    /* Elves peek up into the space under the table, not over it. */
-    .d-elf { display: block; bottom: -0.3vh; height: 3.8vh; width: calc(3.8vh * 90 / 64); }
-    .d-elf.left { left: 9%; }
-    .d-elf.right { right: 9%; scale: -1 1; }
+    /* Elves peek up into the space under the table, not over it, and the
+       swinging one hangs between the name and the trees. */
+    .d-elf { display: block; }
+    .d-elf.wave, .d-elf.gift { bottom: 0; height: 4.4vh; width: calc(4.4vh * 120 / 84); }
+    .d-elf.wave { left: 7%; }
+    .d-elf.gift { right: 7%; }
+    .d-elf.swing { top: 0.3vh; left: 30%; height: 6.2vh; width: calc(6.2vh * 60 / 110); }
+}
 }
 
 /* Snow: two sheets of flakes falling at different speeds. Each sheet is one
