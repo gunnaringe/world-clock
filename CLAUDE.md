@@ -19,6 +19,10 @@ self-hosted VT323 in `fonts/` for the hacker theme — SIL OFL, keep
   variables. The fill-the-screen layout is the `min-width: 900px and
   min-height: 560px` media block; `fitTable()` shrinks table text if 24 rows
   still don't fit.
+- `decor/` — SVG drawings for the Christmas theme. Only `index.html` has the
+  `.decor` layers (back: behind everything; front: just the elves under the
+  table), so settings gets the colours only. Animations move or fade, never
+  repaint (wall screens), and drift with screen protection.
 - `sw.js`, `manifest.webmanifest`, `icons/` — offline/PWA.
 
 ## Deploy
@@ -39,7 +43,7 @@ Plain keys, compatible with the first version: `locations`
 (`[{ id, name, timeZone, hours? }]`), `hourFormat` (`"24"`/`"12"`),
 `showLocal`, `showClocks`, `seconds`, `signage`, `dim` (JSON bools, defaults
 in `TOGGLES`), `protection` (`none`/`gentle`; the retired `flash` and the old
-`screenFlash: true` read as `gentle`), `theme` (`auto`/`light`/`dark`/`hacker`),
+`screenFlash: true` read as `gentle`), `theme` (`auto`/`light`/`dark`/`hacker`/`christmas`),
 `lang` (`auto`/`en`/`no`), `hours` (`DEFAULT_HOURS` shape). Every key must be listed in `SETTINGS_KEYS`
 (reset, share-link import and undo rely on it). Render user text with
 `textContent` — names can come from share links.

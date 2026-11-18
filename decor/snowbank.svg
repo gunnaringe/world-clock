@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 20" preserveAspectRatio="none">
+  <!-- Soft snow along the bottom of the screen; repeats across. -->
+  <path d="M0 20V9C20 9 30 3 52 3S82 11 104 11 134 4 154 4 182 9 200 9V20Z" fill="#c9d6ea" opacity="0.55"/>
+  <path d="M0 20V11C22 11 32 6 54 6S84 13 106 13 136 7 156 7 182 11 200 11V20Z" fill="#eef4fc"/>
+</svg>
