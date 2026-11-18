@@ -334,6 +334,17 @@ function decPlace(tok) {
     };
 }
 
+// Places are split on ~. Some apps re-encode a link's ~ as %7E when they
+// pass it on; a name's own ~ is %7E too, so split there only where a known
+// time zone follows.
+function splitPlaces(v) {
+    return (v ? v.split('~') : []).flatMap((tok) => tok.split(/%7E/i).reduce((acc, part) => {
+        if (acc.length && !canon(decZone(part.split('_')[0]))) acc[acc.length - 1] += '%7E' + part;
+        else acc.push(part);
+        return acc;
+    }, []));
+}
+
 function encodeSetup() {
     const parts = [];
     parts.push('p=' + getLocations().map((l) => encPlace(l)).join('~'));
@@ -364,7 +375,7 @@ function decodeSetup(hash) {
         const k = part.slice(0, i), v = part.slice(i + 1);
         if (k === 'p') {
             isSetup = true;
-            const places = (v ? v.split('~') : []).map(decPlace).filter(Boolean);
+            const places = splitPlaces(v).map(decPlace).filter(Boolean);
             out.locations = JSON.stringify(places.map((l, n) => ({
                 id: 'clock-' + n, name: l.name, timeZone: l.timeZone, ...(l.hours && { hours: l.hours }),
             })));
@@ -419,7 +430,7 @@ function decodeTime(hash) {
     return {
         start: Number(v.w) * 60e3,
         hours: Number.isInteger(n) && n >= 1 && n <= 24 ? n : 0,
-        places: (v.m ? v.m.split('~') : []).map(decPlace).filter(Boolean).slice(0, 20)
+        places: splitPlaces(v.m).map(decPlace).filter(Boolean).slice(0, 20)
             .map(({ name, timeZone }) => ({ name, timeZone })),
     };
 }
