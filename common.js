@@ -335,11 +335,16 @@ function decPlace(tok) {
 }
 
 // Places are split on ~. Some apps re-encode a link's ~ as %7E when they
-// pass it on; a name's own ~ is %7E too, so split there only where a known
-// time zone follows.
+// pass it on; a name's own ~ is %7E too, so split there only where a time
+// zone follows. A zone keeps its / as is (or is UTC), while a name's / is
+// %2F, so a name like "A~Europe/Paris" stays whole.
+const zoneAhead = (part) => {
+    const z = part.split('_')[0];
+    return (z.includes('/') || z === 'UTC') && !!canon(decZone(z));
+};
 function splitPlaces(v) {
     return (v ? v.split('~') : []).flatMap((tok) => tok.split(/%7E/i).reduce((acc, part) => {
-        if (acc.length && !canon(decZone(part.split('_')[0]))) acc[acc.length - 1] += '%7E' + part;
+        if (acc.length && !zoneAhead(part)) acc[acc.length - 1] += '%7E' + part;
         else acc.push(part);
         return acc;
     }, []));
