@@ -747,7 +747,7 @@ function takeHash() {
 // (loaded offline), reload anyway to get off the cached copy.
 
 const APP_FILES = ['./', 'styles.css', 'i18n.js', 'common.js', 'theme.js', 'script.js',
-    'decor/nativity.svg', 'decor/tree.svg', 'decor/lights.svg'];
+    'decor/nativity.svg', 'decor/tree.svg', 'decor/lights.svg', 'decor/snow-edge.svg'];
 let baseline;
 let nextCheck = nextFourAm(new Date());
 

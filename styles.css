@@ -275,20 +275,44 @@
 @keyframes hop { 0%, 60%, 100% { translate: 0 0; } 70% { translate: 0 -7px; } 80% { translate: 0 0; } 87% { translate: 0 -3px; } 94% { translate: 0 0; } }
 @keyframes kick { from { rotate: -22deg; } to { rotate: 8deg; } }
 
+/* Phones and small windows: the stable stands on the first card, an elf
+   swings beside it, and the trees and the other elves gather at the end of
+   the page. */
+.decor { --ground: 80px; }
+.d-nativity { top: calc(var(--ground) - var(--h) * 0.97); }
+.d-star { top: calc(var(--ground) - 40px * 0.87 - var(--s) * 0.85); }
+.d-glow { top: calc(var(--ground) - 40px * 0.87 - var(--s) * 0.5 - 9px); }
+@media not all and (min-width: 900px) and (min-height: 560px) {
+    [data-theme="christmas"] body:not(.settings-page) .wrap { padding-bottom: 112px; }
+    .d-tree.l1, .d-tree.r1 { display: block; --h: min(86px, 23vw); top: auto; bottom: 6px; }
+    .d-tree.l1 { left: calc(50% - min(146px, 38vw)); }
+    .d-tree.r1 { left: calc(50% + min(146px, 38vw)); }
+    .d-elf.wave, .d-elf.gift { display: block; bottom: 0; height: min(62px, 17vw); width: calc(min(62px, 17vw) * 120 / 84); animation: none; }
+    .d-elf.wave { left: calc(50% - min(100px, 27vw)); }
+    .d-elf.gift { left: calc(50% + 8px); }
+}
+@media not all and (min-width: 900px) and (min-height: 560px) {
+    @media (min-width: 380px) {
+        .d-elf.swing { display: block; top: 1px; left: calc(50% + 56px); height: 54px; width: calc(54px * 60 / 110); }
+    }
+}
 @media (max-width: 369px) {
     .d-nativity { display: none; }
 }
 
-/* Fill-the-screen layout: sized by the screen height, like the topbar. */
+/* Fill-the-screen layout: sized by the screen height, like the topbar. The
+   stable and the trees stand on the top edge of the clocks (the topbar is
+   1.6vh + 2.5rem + 0.6vh, then 0.8vh of padding). */
 @media (min-width: 900px) and (min-height: 560px) {
-    .d-star { --s: 2.3vh; top: 0.2vh; }
-    .d-glow { --s: 7vh; top: calc(1.35vh - var(--s) / 2); }
-    .d-nativity { --h: 4.2vh; top: 1.9vh; }
-    .d-tree { display: block; --h: 4.6vh; top: 1.4vh; }
-    .d-tree.l1 { left: calc(50% - 7.3vh); }
-    .d-tree.r1 { left: calc(50% + 7.3vh); }
-    .d-tree.l2 { --h: 3.3vh; top: 2.7vh; left: calc(50% - 10.6vh); }
-    .d-tree.r2 { --h: 3.3vh; top: 2.7vh; left: calc(50% + 10.6vh); scale: -1 1; }
+    .decor { --ground: calc(3vh + 2.5rem); }
+    .d-nativity { --h: 4.4vh; }
+    .d-star { --s: 2.3vh; top: calc(var(--ground) - 4.4vh * 0.87 - var(--s) * 0.85); }
+    .d-glow { --s: 7vh; top: calc(var(--ground) - 4.4vh * 0.87 - 2.3vh * 0.35 - var(--s) / 2); }
+    .d-tree { display: block; --h: 4.6vh; top: calc(var(--ground) - var(--h) * 0.99); }
+    .d-tree.l1 { left: calc(50% - 7.6vh); }
+    .d-tree.r1 { left: calc(50% + 7.6vh); }
+    .d-tree.l2 { --h: 3.3vh; left: calc(50% - 10.9vh); }
+    .d-tree.r2 { --h: 3.3vh; left: calc(50% + 10.9vh); scale: -1 1; }
     /* Elves peek up into the space under the table, not over it, and the
        swinging one hangs between the name and the trees. */
     .d-elf { display: block; }
@@ -297,7 +321,19 @@
     .d-elf.gift { right: 7%; }
     .d-elf.swing { top: 0.3vh; left: 30%; height: 6.2vh; width: calc(6.2vh * 60 / 110); }
 }
+
+/* Snow lying on the clocks and the planner, under the coloured band. */
+[data-theme="christmas"] .clock::after, [data-theme="christmas"] .planner::after {
+    content: "";
+    position: absolute;
+    inset: 3px 0 auto;
+    height: max(9px, 1vh);
+    background: url(decor/snow-edge.svg) repeat-x 0 0 / max(54px, 6vh) 100%;
+    opacity: 0.85;
+    pointer-events: none;
 }
+[data-theme="christmas"] .planner { position: relative; }
+[data-theme="christmas"] .planner::after { inset: 0 0 auto; border-radius: var(--radius) var(--radius) 0 0; }
 
 /* Snow: two sheets of flakes falling at different speeds. Each sheet is one
    tile taller than the page and only moves (no repaints), which keeps small
