@@ -21,7 +21,7 @@ const PRECACHE = [
     './', 'settings.html', 'styles.css', 'theme.js', 'i18n.js', 'common.js', 'script.js', 'settings.js',
     'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png',
     'fonts/vt323-latin.woff2', 'fonts/vt323-latin-ext.woff2',
-    'decor/nativity.svg', 'decor/tree.svg', 'decor/lights.svg', 'decor/snow-edge.svg', 'decor/snowbank.svg',
+    'decor/lights.svg', 'decor/snow-edge.svg', 'decor/snowbank.svg',
 ];
 
 // "/index.html" -> "/", "/settings.html" -> "/settings".

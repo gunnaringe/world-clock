@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 14" preserveAspectRatio="none">
   <!-- Snow lying along a card's top edge; soft drifts, repeats across. -->
-  <path d="M0 0H120V6.5C112 6.5 110 10.5 103 10.5S95 7.5 89 7.5 81 11.5 74 11.5 67 7.5 61 7.5 54 9.5 47 9.5 40 6.5 33 6.5 26 10.5 19 10.5 12 6.5 0 6.5Z" fill="#c9d6ea" opacity="0.6"/>
+  <path d="M0 0H120V6.5C112 6.5 110 10.5 103 10.5S95 7.5 89 7.5 81 11.5 74 11.5 67 7.5 61 7.5 54 9.5 47 9.5 40 6.5 33 6.5 26 10.5 19 10.5 12 6.5 0 6.5Z" fill="#a9bdd8" opacity="0.9"/>
   <path d="M0 0H120V5C112 5 110 9 103 9S95 6 89 6 81 10 74 10 67 6 61 6 54 8 47 8 40 5 33 5 26 9 19 9 12 5 0 5Z" fill="#f6faff"/>
   <path d="M72 9.5C72 12 73 13.5 74 13.5S76 12 76 9.5Z" fill="#f6faff"/>
 </svg>

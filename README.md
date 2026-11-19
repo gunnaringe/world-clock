@@ -27,8 +27,8 @@ and evening, and night. Made for office wall screens as much as for phones.
   outside working hours).
   Unattended screens pick up new versions by themselves overnight.
 - 🔗 **Share setup** — one link sets up another screen or device the same way.
-- ⚙️ Themes (auto, light, dark, hacker, Christmas — with a nativity scene, trees,
-  elves and snow), 12/24-hour, optional seconds,
+- ⚙️ Themes (auto, light, dark, hacker, Christmas — a light, snowy theme with a
+  living nativity scene, Santa's sleigh, trees, elves and falling snow), 12/24-hour, optional seconds,
   English or Norwegian, show your own time zone, hide the big clocks.
 - 📲 **Installable, works offline**, no accounts, no tracking, no third-party
   requests — settings live in the browser's `localStorage`.
