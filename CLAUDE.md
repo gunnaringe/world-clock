@@ -10,8 +10,11 @@ self-hosted VT323 in `fonts/` for the hacker theme — SIL OFL, keep
 `fonts/OFL-VT323.txt`), so it works offline. Keep it that way.
 
 - `index.html` + `script.js` — clocks and the 24-hour table.
-- `settings.html` + `settings.js` — settings page.
-- `common.js` — time zone math, search, settings storage, share links. Shared.
+- `settings.html` + `settings.js` — settings page: one column, two from
+  1200 px (`.settings-grid` with two `.col`s). Places reorder by dragging
+  the grip (pointer events, so touch too) or with arrow keys on it.
+- `common.js` — time zone math, search, settings storage, share links,
+  the toast (`showToast`). Shared.
 - `i18n.js` — all UI strings (`en`, `no`; same keys in both) and `t()` /
   `applyI18n()`, wired via `data-i18n`, `-html`, `-title`, `-aria`, `-placeholder`.
 - `theme.js` — loaded in `<head>` so the theme applies before first paint.
