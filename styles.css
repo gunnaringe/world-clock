@@ -303,12 +303,13 @@
 @keyframes glint { 0%, 80%, 100% { scale: 1; rotate: 0deg; } 88% { scale: 1.4; rotate: 20deg; } }
 @keyframes wiggle { 0%, 84%, 100% { rotate: 0deg; } 87% { rotate: -4deg; } 90% { rotate: 3deg; } 93% { rotate: -2deg; } }
 
-/* Santa crosses the sky every two and a half minutes: about 20 seconds in
-   view, galloping, waving, Rudolph's nose blinking. Before his first pass
-   (and with reduced motion) he waits off-screen to the left. */
+/* Santa flies over the planner every two and a half minutes, in a gentle
+   arc: about 20 seconds in view, galloping, waving, Rudolph's nose
+   blinking. Before his first pass (and with reduced motion) he waits
+   off-screen to the left. */
 .d-santa {
-    --sh: 34px;
-    top: 3px;
+    --sh: 76px;
+    top: 300px;
     left: 0;
     height: var(--sh);
     width: calc(var(--sh) * 290 / 70);
@@ -317,6 +318,9 @@
 }
 @keyframes fly {
     0% { translate: -105% 0; }
+    3.3% { translate: calc(25vw - 77.5%) -3.5vh; }
+    6.65% { translate: calc(50vw - 50%) -5vh; }
+    10% { translate: calc(75vw - 22.5%) -3.5vh; }
     13.3% { translate: calc(100vw + 5%) 0; }
     100% { translate: calc(100vw + 5%) 0; }
 }
@@ -375,6 +379,10 @@
     .d-elf.wave, .d-elf.gift { display: block; bottom: 0; height: min(62px, 17vw); width: calc(min(62px, 17vw) * 120 / 84); animation: none; }
     .d-elf.wave { left: calc(50% - min(100px, 27vw)); }
     .d-elf.gift { left: calc(50% + 8px); }
+    /* The page scrolls here, so Santa flies across the middle of the
+       screen, wherever it is (fixed needs a front layer without translate). */
+    [data-theme="christmas"] .decor.front { translate: none; }
+    .d-santa { position: fixed; top: 42vh; }
 }
 @media not all and (min-width: 900px) and (min-height: 560px) {
     @media (min-width: 380px) {
@@ -390,7 +398,7 @@
    1.6vh + 2.5rem + 0.6vh, then 0.8vh of padding). */
 @media (min-width: 900px) and (min-height: 560px) {
     .decor { --ground: calc(3vh + 2.5rem); }
-    .d-santa { --sh: 3.6vh; top: 0.5vh; }
+    .d-santa { --sh: 12vh; top: 52vh; }
     .d-nativity { --h: 4.4vh; }
     .d-star { --s: 2.3vh; top: calc(var(--ground) - 4.4vh * 0.87 - var(--s) * 0.85); }
     .d-glow { --s: 7vh; top: calc(var(--ground) - 4.4vh * 0.87 - 2.3vh * 0.35 - var(--s) / 2); }
