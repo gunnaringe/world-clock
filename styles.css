@@ -328,7 +328,7 @@
 .s-legf, .s-legb { animation: gallop 0.5s ease-in-out infinite alternate; }
 .s-legb { animation-direction: alternate-reverse; }
 .s-legf.b, .s-legb.b { animation-delay: -0.25s; }
-.s-wave { animation: santa-wave 3s ease-in-out infinite; }
+.s-wave { animation: santa-wave 2.4s ease-in-out infinite; }
 .s-nose, .s-glow { animation: nose 1.2s steps(1) infinite; }
 .s-sp { animation: trail 1.2s ease-out infinite; }
 .s-sp:nth-of-type(2) { animation-delay: -0.3s; }
@@ -336,7 +336,7 @@
 .s-sp:nth-of-type(4) { animation-delay: -0.9s; }
 @keyframes ride { from { translate: 0 -2px; rotate: -1deg; } to { translate: 0 3px; rotate: 1.5deg; } }
 @keyframes gallop { from { rotate: -22deg; } to { rotate: 18deg; } }
-@keyframes santa-wave { 0%, 40%, 100% { rotate: 0deg; } 50%, 70% { rotate: -25deg; } 60%, 80% { rotate: 10deg; } }
+@keyframes santa-wave { 0%, 25%, 100% { rotate: 0deg; } 35%, 55%, 75% { rotate: -32deg; } 45%, 65% { rotate: 8deg; } }
 @keyframes nose { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 @keyframes trail { from { opacity: 1; scale: 1; } to { opacity: 0; scale: 0.3; } }
 /* The elves: one swings from the light string, one waves and one shows off
