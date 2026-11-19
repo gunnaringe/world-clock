@@ -456,3 +456,28 @@ function writeSettings(values) {
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }
+
+// ---------- Toast ----------
+// Both pages have a #toast with #toast-text and #toast-action.
+
+let toastTimer;
+function showToast(text, action, ms = 4000) {
+    document.getElementById('toast-text').textContent = text;
+    const btn = document.getElementById('toast-action');
+    btn.hidden = !action;
+    if (action) {
+        btn.textContent = action.label;
+        btn.onclick = () => { hideToast(); action.run(); };
+    }
+    const toastEl = document.getElementById('toast');
+    toastEl.hidden = false;
+    requestAnimationFrame(() => toastEl.classList.add('show'));
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, ms);
+}
+function hideToast() {
+    const toastEl = document.getElementById('toast');
+    toastEl.classList.remove('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toastEl.hidden = true; }, 300);
+}

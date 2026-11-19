@@ -580,8 +580,8 @@ html { overflow-x: hidden; }
 .icon-btn:hover { color: var(--text); background: var(--card-strong); }
 .icon-btn:active { transform: scale(0.96); }
 .icon-btn:disabled { opacity: .3; cursor: default; }
-.icon-btn.small { width: 34px; height: 34px; border-radius: 10px; }
-.icon-btn.small svg { width: 16px; height: 16px; }
+.icon-btn.small { width: 2.125rem; height: 2.125rem; border-radius: 10px; }
+.icon-btn.small svg { width: 1rem; height: 1rem; }
 .icon-btn.danger:hover { color: var(--danger); }
 
 .btn {
@@ -614,7 +614,7 @@ html { overflow-x: hidden; }
     gap: clamp(16px, 2.5vw, 28px);
 }
 .wrap > * { min-width: 0; }
-.wrap.narrow { max-width: 720px; }
+.wrap.narrow { max-width: 45rem; }
 
 /* ---------- Clocks ---------- */
 
@@ -969,15 +969,27 @@ body.idle .selbar { opacity: 0; }
 
 /* ---------- Settings ---------- */
 
-.settings-page .topbar { max-width: 720px; }
+.settings-page .topbar { max-width: 45rem; }
+/* Settings: one column, or two side by side where there's room (places and
+   sharing on the left, the rest on the right). Sized in rem so it grows with
+   the text on big screens. */
+.settings-grid .col { display: grid; gap: inherit; align-content: start; min-width: 0; }
+.settings-grid .footer { grid-column: 1 / -1; }
+@media (min-width: 1200px) {
+    .settings-page .topbar, .wrap.narrow.settings-grid { max-width: 92rem; }
+    .settings-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+}
 .settings-page .brand { color: var(--text); font-size: 1.1rem; font-weight: 600; }
-.topbar-spacer { width: 72px; }
+/* Icons grow with the text on big screens. */
+.settings-page .back svg, .settings-page .search > svg { width: 1.25rem; height: 1.25rem; }
+.settings-page .footer svg { width: 1rem; height: 1rem; }
+.topbar-spacer { width: 4.5rem; }
 
 .back {
     display: inline-flex;
     align-items: center;
     gap: 2px;
-    width: 72px;
+    width: 4.5rem;
     color: var(--accent);
     text-decoration: none;
     font-weight: 500;
@@ -991,7 +1003,7 @@ body.idle .selbar { opacity: 0; }
 .search { position: relative; }
 .search > svg {
     position: absolute;
-    left: 14px;
+    left: 0.875rem;
     top: 50%;
     transform: translateY(-50%);
     color: var(--muted);
@@ -999,7 +1011,7 @@ body.idle .selbar { opacity: 0; }
 }
 .search input {
     width: 100%;
-    padding: 14px 16px 14px 44px;
+    padding: 0.875rem 1rem 0.875rem 2.75rem;
     border-radius: 14px;
     border: 1px solid var(--border);
     background: var(--card-strong);
@@ -1044,18 +1056,32 @@ body.idle .selbar { opacity: 0; }
 .result-time { min-width: 72px; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
 
 .places { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 8px; }
+/* A place: grip, name and buttons on top, zone, offset and time below. */
 .place {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "grip name actions" "grip meta meta";
     align-items: center;
-    gap: 12px;
-    padding: 10px 10px 10px 14px;
+    gap: 2px 8px;
+    padding: 8px 8px 8px 4px;
     border-radius: 14px;
     border: 1px solid var(--border);
     background: var(--card-strong);
 }
 .place.added { animation: added 1.2s ease-out; }
 @keyframes added { from { box-shadow: 0 0 0 3px var(--accent-soft); border-color: var(--accent); } }
-.place-main { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.place > .grip { grid-area: grip; align-self: center; }
+.place > .place-name { grid-area: name; }
+.place > .place-actions { grid-area: actions; }
+.place > .place-meta { grid-area: meta; }
+.place > .place-hours { grid-column: 1 / -1; }
+.place .grip.icon-btn.small { width: 1.75rem; border-color: transparent; background: transparent; color: var(--muted); cursor: grab; touch-action: none; }
+.grip svg { fill: currentColor; stroke: none; width: 1.15rem; height: 1.15rem; }
+.grip:hover, .grip:focus-visible { color: var(--text); }
+.place.dragging { position: relative; z-index: 2; box-shadow: 0 16px 32px -12px rgba(0, 0, 0, 0.35); border-color: var(--accent); }
+.place.dragging .grip { cursor: grabbing; }
+.places.sorting { user-select: none; -webkit-user-select: none; }
+.places.sorting .place:not(.dragging) { transition: translate .15s ease; }
 .place-name {
     width: 100%;
     padding: 4px 6px;
@@ -1080,7 +1106,12 @@ body.idle .selbar { opacity: 0; }
 }
 .place-time { font-variant-numeric: tabular-nums; }
 .place-actions { display: flex; gap: 4px; }
-.place { flex-wrap: wrap; }
+.place-meta { padding-left: 1px; }
+/* Fingers need bigger targets. */
+@media (pointer: coarse) {
+    .place .icon-btn.small { width: 2.5rem; height: 2.5rem; }
+    .place .grip.icon-btn.small { width: 2.25rem; }
+}
 .place-hours {
     flex-basis: 100%;
     margin: 4px 0 2px;
@@ -1164,7 +1195,7 @@ body.idle .selbar { opacity: 0; }
 }
 .segmented button[aria-checked="true"] { background: var(--accent); color: var(--on-accent); text-shadow: none; }
 
-.switch { position: relative; display: inline-block; width: 46px; height: 28px; flex: none; }
+.switch { position: relative; display: inline-block; width: 2.875rem; height: 1.75rem; flex: none; }
 .switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 1; }
 .switch span {
     position: absolute;
@@ -1177,17 +1208,17 @@ body.idle .selbar { opacity: 0; }
 .switch span::after {
     content: "";
     position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 20px;
-    height: 20px;
+    top: 0.1875rem;
+    left: 0.1875rem;
+    width: 1.25rem;
+    height: 1.25rem;
     border-radius: 50%;
     background: #fff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     transition: transform .2s;
 }
 .switch input:checked + span { background: var(--accent); border-color: transparent; }
-.switch input:checked + span::after { transform: translateX(18px); }
+.switch input:checked + span::after { transform: translateX(1.125rem); }
 .switch input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ---------- Topbar actions / fullscreen ---------- */

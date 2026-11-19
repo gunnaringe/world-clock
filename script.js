@@ -581,28 +581,6 @@ document.getElementById('shared-close').addEventListener('click', () => {
     setSel(null);
 });
 
-// ---------- Toast ----------
-
-const toastEl = document.getElementById('toast');
-let toastTimer;
-function showToast(text, action, ms = 4000) {
-    document.getElementById('toast-text').textContent = text;
-    const btn = document.getElementById('toast-action');
-    btn.hidden = !action;
-    if (action) {
-        btn.textContent = action.label;
-        btn.onclick = () => { hideToast(); action.run(); };
-    }
-    toastEl.hidden = false;
-    requestAnimationFrame(() => toastEl.classList.add('show'));
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(hideToast, ms);
-}
-function hideToast() {
-    toastEl.classList.remove('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { toastEl.hidden = true; }, 300);
-}
 
 // ---------- Tick ----------
 

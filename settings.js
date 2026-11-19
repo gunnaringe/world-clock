@@ -9,8 +9,7 @@ let active = 0;
 const openHours = new Set(); // places whose hours panel is expanded
 
 const ICONS = {
-    up: '<path d="M6 15l6-6 6 6"/>',
-    down: '<path d="M6 9l6 6 6-6"/>',
+    grip: '<circle cx="9" cy="6" r="1.3"/><circle cx="15" cy="6" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="18" r="1.3"/><circle cx="15" cy="18" r="1.3"/>',
     remove: '<path d="M6 6l12 12M18 6L6 18"/>',
     hours: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
 };
@@ -116,11 +115,43 @@ function placeHoursPanel(p) {
 
 // ---------- Places ----------
 
+function movePlace(from, to) {
+    if (to === from || to < 0 || to >= places.length) return;
+    places.splice(to, 0, places.splice(from, 1)[0]);
+    save();
+    renderPlaces(to, 'grip');
+}
+
+function removePlace(i) {
+    const p = places[i];
+    openHours.delete(p);
+    places.splice(i, 1);
+    save();
+    renderPlaces();
+    showToast(t('removed', { name: p.name }), {
+        label: t('undo'),
+        run: () => {
+            const at = Math.min(i, places.length);
+            places.splice(at, 0, p);
+            save();
+            renderPlaces(at, 'remove');
+        },
+    }, 6000);
+}
+
 function renderPlaces(focusIndex, focusAction) {
     placesEmptyEl.hidden = places.length > 0;
     placesEl.replaceChildren(...places.map((p, i) => {
         const li = el('li', 'place');
-        const main = el('div', 'place-main');
+        const grip = iconButton('grip', t('reorder', { name: p.name }), () => {});
+        grip.classList.add('grip');
+        grip.addEventListener('pointerdown', (e) => startDrag(e, li, i));
+        grip.addEventListener('keydown', (e) => {
+            const to = { ArrowUp: i - 1, ArrowDown: i + 1, Home: 0, End: places.length - 1 }[e.key];
+            if (to == null) return;
+            e.preventDefault();
+            movePlace(i, to);
+        });
         const name = el('input', 'place-name');
         name.value = p.name;
         name.placeholder = cityOf(p.timeZone);
@@ -131,30 +162,15 @@ function renderPlaces(focusIndex, focusAction) {
         });
         const meta = el('div', 'place-meta');
         meta.dataset.index = i;
-        main.append(name, meta);
 
         const actions = el('div', 'place-actions');
-        const move = (d) => () => {
-            [places[i], places[i + d]] = [places[i + d], places[i]];
-            save();
-            renderPlaces(i + d, d < 0 ? 'up' : 'down');
-        };
         const hoursBtn = iconButton('hours', t('hoursFor', { name: p.name }), () => {
             if (openHours.has(p)) openHours.delete(p); else openHours.add(p);
             renderPlaces(i, 'hours');
         });
         hoursBtn.setAttribute('aria-expanded', String(openHours.has(p)));
-        const up = iconButton('up', t('moveUp'), move(-1));
-        const down = iconButton('down', t('moveDown'), move(1));
-        up.disabled = i === 0;
-        down.disabled = i === places.length - 1;
-        actions.append(hoursBtn, up, down, iconButton('remove', t('remove', { name: p.name }), () => {
-            openHours.delete(p);
-            places.splice(i, 1);
-            save();
-            renderPlaces();
-        }));
-        li.append(main, actions);
+        actions.append(hoursBtn, iconButton('remove', t('remove', { name: p.name }), () => removePlace(i)));
+        li.append(grip, name, actions, meta);
         if (openHours.has(p)) li.append(placeHoursPanel(p));
         return li;
     }));
@@ -164,6 +180,62 @@ function renderPlaces(focusIndex, focusAction) {
         const btn = li?.querySelector(`[data-action="${focusAction}"]`);
         (btn && !btn.disabled ? btn : li?.querySelector('.place-name'))?.focus();
     }
+}
+
+// Drag a place by its grip (mouse, touch or pen). The place follows the
+// pointer, the others slide aside, and it lands where it's let go. Near the
+// top or bottom of the window the page scrolls along.
+function startDrag(e, li, from) {
+    if (e.button !== 0 || places.length < 2) return;
+    e.preventDefault();
+    const grip = e.currentTarget;
+    grip.setPointerCapture(e.pointerId);
+    grip.focus({ preventScroll: true });
+    const items = [...placesEl.children];
+    const centres = items.map((x) => { const r = x.getBoundingClientRect(); return r.top + scrollY + r.height / 2; });
+    const gap = parseFloat(getComputedStyle(placesEl).rowGap) || 0;
+    const step = li.getBoundingClientRect().height + gap;
+    const startY = e.clientY + scrollY;
+    let y = e.clientY;
+    let to = from;
+    let frame;
+    li.classList.add('dragging');
+    placesEl.classList.add('sorting');
+
+    const update = () => {
+        const dy = y + scrollY - startY;
+        const centre = centres[from] + dy;
+        to = from;
+        for (let j = 0; j < from; j++) if (centre < centres[j]) { to = j; break; }
+        for (let j = items.length - 1; j > from; j--) if (centre > centres[j]) { to = j; break; }
+        li.style.translate = `0 ${dy}px`;
+        items.forEach((x, j) => {
+            if (j === from) return;
+            const shift = j >= to && j < from ? step : j <= to && j > from ? -step : 0;
+            x.style.translate = shift ? `0 ${shift}px` : '';
+        });
+    };
+    const scroll = () => {
+        const edge = 56;
+        const v = y < edge ? -(edge - y) / 4 : y > innerHeight - edge ? (y - innerHeight + edge) / 4 : 0;
+        if (v) { scrollBy(0, v); update(); }
+        frame = requestAnimationFrame(scroll);
+    };
+    frame = requestAnimationFrame(scroll);
+    const move = (ev) => { y = ev.clientY; update(); };
+    const end = (ev) => {
+        cancelAnimationFrame(frame);
+        grip.removeEventListener('pointermove', move);
+        grip.removeEventListener('pointerup', end);
+        grip.removeEventListener('pointercancel', end);
+        placesEl.classList.remove('sorting');
+        for (const x of items) x.style.translate = '';
+        li.classList.remove('dragging');
+        if (ev.type === 'pointerup' && to !== from) movePlace(from, to);
+    };
+    grip.addEventListener('pointermove', move);
+    grip.addEventListener('pointerup', end);
+    grip.addEventListener('pointercancel', end);
 }
 
 function tickMeta() {
@@ -199,9 +271,11 @@ function renderResults() {
             li.setAttribute('role', 'option');
             const text = el('div', 'result-text');
             text.append(el('span', 'result-name', r.label), el('span', 'result-zone', m.where));
-            li.append(text, el('span', 'chip', m.off), el('span', 'result-time', m.time));
+            li.append(text);
+            if (indexOfZone(r.zone) >= 0) li.append(el('span', 'chip accent', t('inList')));
+            li.append(el('span', 'chip', m.off), el('span', 'result-time', m.time));
             li.addEventListener('mousedown', (e) => e.preventDefault()); // keep focus in the input
-            li.addEventListener('click', () => addPlace(r));
+            li.addEventListener('click', () => pickResult(r));
             li.addEventListener('mousemove', () => setActive(i));
             return li;
         }));
@@ -216,6 +290,23 @@ function setActive(i) {
     const cur = results.length ? 'result-' + i : '';
     searchEl.setAttribute('aria-activedescendant', cur);
     if (cur) document.getElementById(cur).scrollIntoView({ block: 'nearest' });
+}
+
+const indexOfZone = (zone) => places.findIndex((p) => canon(p.timeZone) === canon(zone));
+
+// A zone already in the list is shown instead of added again; the toast
+// still lets you add it (two offices in one zone, say).
+function pickResult(r) {
+    const i = indexOfZone(r.zone);
+    if (i < 0) { addPlace(r); return; }
+    searchEl.value = '';
+    openResults(false);
+    const li = placesEl.children[i];
+    li.classList.remove('added');
+    void li.offsetWidth; // restart the highlight
+    li.classList.add('added');
+    li.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    showToast(t('alreadyInList', { name: places[i].name }), { label: t('addAnyway'), run: () => addPlace(r) }, 6000);
 }
 
 function addPlace(r) {
@@ -242,7 +333,7 @@ searchEl.addEventListener('keydown', (e) => {
         setActive((active + d + results.length) % results.length);
     } else if (e.key === 'Enter') {
         e.preventDefault();
-        if (results[active]) addPlace(results[active]);
+        if (results[active]) pickResult(results[active]);
     } else if (e.key === 'Escape') {
         if (!resultsEl.hidden) { e.preventDefault(); openResults(false); }
     }
