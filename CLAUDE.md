@@ -14,7 +14,9 @@ headings only, never the times or table — Apache 2.0, keep
 - `index.html` + `script.js` — clocks and the 24-hour table.
 - `settings.html` + `settings.js` — settings page: one column, two from
   1200 px (`.settings-grid` with two `.col`s). Places reorder by dragging
-  the grip (pointer events, so touch too) or with arrow keys on it.
+  the grip (pointer events, so touch too) or with arrow keys on it. The
+  "Install as app" card uses `beforeinstallprompt` where offered (Chrome,
+  Edge), else shows how via the browser menu; hidden when already installed.
 - `common.js` — time zone math, search, settings storage, share links,
   the toast (`showToast`). Shared.
 - `i18n.js` — all UI strings (`en`, `no`; same keys in both) and `t()` /
