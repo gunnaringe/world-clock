@@ -16,11 +16,11 @@
 //
 // Bump CACHE only when changing what's precached or how.
 
-const CACHE = 'world-clock-v3';
+const CACHE = 'world-clock-v4';
 const PRECACHE = [
     './', 'settings.html', 'styles.css', 'theme.js', 'i18n.js', 'common.js', 'script.js', 'settings.js',
     'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png',
-    'fonts/vt323-latin.woff2', 'fonts/vt323-latin-ext.woff2',
+    'fonts/vt323-latin.woff2', 'fonts/vt323-latin-ext.woff2', 'fonts/mountains-of-christmas-bold-latin.woff2',
     'decor/lights.svg', 'decor/snow-edge.svg', 'decor/snowbank.svg',
 ];
 

@@ -7,7 +7,9 @@ screens left running for weeks; phones and laptops second.
 
 No build, no dependencies, no third-party requests (system fonts, plus
 self-hosted VT323 in `fonts/` for the hacker theme — SIL OFL, keep
-`fonts/OFL-VT323.txt`), so it works offline. Keep it that way.
+`fonts/OFL-VT323.txt`; Mountains of Christmas Bold for the Christmas theme's
+headings only, never the times or table — Apache 2.0, keep
+`fonts/LICENSE-MountainsOfChristmas.txt`), so it works offline. Keep it that way.
 
 - `index.html` + `script.js` — clocks and the 24-hour table.
 - `settings.html` + `settings.js` — settings page: one column, two from

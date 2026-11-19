@@ -14,6 +14,16 @@
     src: url(fonts/vt323-latin.woff2) format("woff2");
     unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
+/* Mountains of Christmas Bold (Apache 2.0, see fonts/LICENSE-MountainsOfChristmas.txt)
+   for headings in the Christmas theme; only downloaded when that theme uses it. */
+@font-face {
+    font-family: "Mountains of Christmas";
+    font-weight: 700;
+    font-display: swap;
+    src: url(fonts/mountains-of-christmas-bold-latin.woff2) format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 
 :root, [data-theme="dark"] {
     --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -203,6 +213,18 @@
 }
 [data-theme="christmas"] body:not(.settings-page) { position: relative; }
 [data-theme="christmas"] .decor.front { z-index: 5; }
+
+/* Festive headings; the times, dates and table keep the plain font. */
+[data-theme="christmas"] body:not(.settings-page) :is(.brand, .clock-name, .planner-head h2, .th-name) {
+    font-family: "Mountains of Christmas", var(--font);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+[data-theme="christmas"] body:not(.settings-page) .brand { font-size: 1.25rem; color: var(--text); }
+[data-theme="christmas"] body:not(.settings-page) .clock-name { font-size: 1.4rem; line-height: 1.15; }
+[data-theme="christmas"] body:not(.settings-page) .planner-head h2 { font-size: 1.35rem; }
+[data-theme="christmas"] body:not(.settings-page) .th-name { font-size: 1.15em; }
+[data-theme="christmas"] .s-say text { font-family: "Mountains of Christmas", var(--font); font-size: 14px; }
 .decor > * { position: absolute; background: no-repeat center / contain; }
 
 /* A light string along the top edge; half the bulbs glow, then the others.
