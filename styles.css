@@ -329,6 +329,9 @@
 .s-legb { animation-direction: alternate-reverse; }
 .s-legf.b, .s-legb.b { animation-delay: -0.25s; }
 .s-wave { animation: santa-wave 2.4s ease-in-out infinite; }
+.s-say { animation: say 5s ease-out infinite; }
+.s-say text { font-family: var(--font); }
+@keyframes say { 0%, 30% { opacity: 0; scale: 0.2; } 38% { opacity: 1; scale: 1.08; } 42%, 88% { opacity: 1; scale: 1; } 96%, 100% { opacity: 0; scale: 0.6; } }
 .s-nose, .s-glow { animation: nose 1.2s steps(1) infinite; }
 .s-sp { animation: trail 1.2s ease-out infinite; }
 .s-sp:nth-of-type(2) { animation-delay: -0.3s; }
