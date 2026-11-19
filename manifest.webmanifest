@@ -1,7 +1,7 @@
 {
   "id": "/",
   "name": "World Clock",
-  "short_name": "Clock",
+  "short_name": "World Clock",
   "description": "World clock with a 24-hour planner for your places",
   "start_url": "/",
   "scope": "/",
