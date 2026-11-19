@@ -137,48 +137,53 @@
 [data-theme="hacker"] .switch span::after { border-radius: 1px; }
 
 [data-theme="christmas"] {
-    --bg: #15293f;
-    --bg-glow-1: rgba(255, 210, 120, 0.2);
-    --bg-glow-2: rgba(60, 175, 110, 0.22);
-    --card: rgba(70, 150, 105, 0.16);
-    --card-strong: rgba(70, 150, 105, 0.3);
-    --border: rgba(242, 193, 78, 0.26);
-    --text: #fbf6ea;
-    --muted: #d6cbb0;
-    --faint: #a0957b;
-    --accent: #e8505a;
-    --accent-soft: rgba(232, 80, 90, 0.2);
-    --sel: rgba(232, 80, 90, 0.32);
-    --danger: #ff8a8a;
+    --bg: #e9f0f8;
+    --bg-glow-1: rgba(255, 196, 80, 0.26);
+    --bg-glow-2: rgba(60, 160, 100, 0.16);
+    --card: rgba(255, 255, 255, 0.78);
+    --card-strong: #fff;
+    --border: rgba(31, 100, 66, 0.16);
+    --text: #173a2a;
+    --muted: #4c6658;
+    --faint: #8ba093;
+    --accent: #c8323c;
+    --accent-soft: rgba(200, 50, 60, 0.1);
+    --sel: rgba(200, 50, 60, 0.18);
+    --on-accent: #fff;
+    --danger: #c8323c;
 
-    --work: #5bd08c;
-    --work-bg: rgba(91, 208, 140, 0.2);
-    --edge: #f5c95a;
-    --edge-bg: rgba(245, 201, 90, 0.2);
-    --night: #9fb4ee;
-    --night-bg: rgba(159, 180, 238, 0.1);
-    color-scheme: dark;
+    --work: #1d8a4f;
+    --work-bg: rgba(29, 138, 79, 0.15);
+    --edge: #b7791f;
+    --edge-bg: rgba(230, 170, 40, 0.2);
+    --night: #5468a8;
+    --night-bg: rgba(84, 104, 168, 0.08);
+
+    --shadow: 0 1px 2px rgba(23, 58, 42, 0.05), 0 12px 32px -16px rgba(23, 58, 42, 0.22);
+    color-scheme: light;
 }
 [data-theme="christmas"] body {
     background:
         radial-gradient(40rem 24rem at 50% -8%, var(--bg-glow-1), transparent 60%),
         radial-gradient(50rem 36rem at 0% 110%, var(--bg-glow-2), transparent 60%),
         radial-gradient(50rem 36rem at 100% 110%, var(--bg-glow-2), transparent 60%),
-        var(--bg);
+        linear-gradient(#d7e4f2, var(--bg) 40%);
     background-attachment: fixed;
 }
-/* A gold star for the dot by the name. */
+/* A gold star for the dot by the name; it twinkles. */
 [data-theme="christmas"] .brand-dot {
     width: 0.95em;
     height: 0.95em;
     border-radius: 0;
-    background: #ffd76a;
+    background: #e3a922;
     box-shadow: none;
     clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    animation: twinkle-small 5.3s ease-in-out infinite;
 }
+@keyframes twinkle-small { 0%, 84%, 100% { scale: 1; rotate: 0deg; } 90% { scale: 1.35; rotate: 18deg; } 95% { scale: 0.9; } }
 /* Selected hours get a candy-cane stripe. */
 [data-theme="christmas"] tbody tr.sel td {
-    background-image: repeating-linear-gradient(135deg, rgba(229, 72, 77, 0.34) 0 0.5em, rgba(255, 255, 255, 0.08) 0.5em 1em);
+    background-image: repeating-linear-gradient(135deg, rgba(200, 50, 60, 0.24) 0 0.5em, rgba(255, 255, 255, 0.55) 0.5em 1em);
 }
 
 /* ---------- Christmas decorations ----------
@@ -209,21 +214,21 @@
     right: 0;
     height: var(--lh);
     background: url(decor/lights.svg) repeat-x 0 0 / auto 100%;
-    opacity: 0.85;
+    opacity: 0.95;
 }
 .d-lights::before, .d-lights::after {
     content: "";
     position: absolute;
     inset: 0;
     background-image:
-        radial-gradient(circle at var(--a) 58%, rgba(255, 232, 170, 0.95), transparent calc(var(--lh) * 0.45)),
-        radial-gradient(circle at var(--b) 58%, rgba(255, 232, 170, 0.95), transparent calc(var(--lh) * 0.45));
+        radial-gradient(circle at var(--a) 58%, rgba(255, 214, 110, 0.95), transparent calc(var(--lh) * 0.45)),
+        radial-gradient(circle at var(--b) 58%, rgba(255, 214, 110, 0.95), transparent calc(var(--lh) * 0.45));
     background-size: calc(var(--lh) * 5) 100%;
     background-repeat: repeat-x;
-    animation: twinkle 3.2s ease-in-out infinite alternate;
+    animation: twinkle 1.6s ease-in-out infinite alternate;
 }
 .d-lights::before { --a: 12.5%; --b: 62.5%; }
-.d-lights::after  { --a: 37.5%; --b: 87.5%; animation-delay: -3.2s; }
+.d-lights::after  { --a: 37.5%; --b: 87.5%; animation-delay: -1.6s; }
 @keyframes twinkle { from { opacity: 0.05; } to { opacity: 0.8; } }
 
 /* Between the name and the buttons: the star over the stable, and trees on
@@ -234,8 +239,16 @@
     top: 2px;
     width: var(--s);
     height: var(--s);
-    background: #ffd76a;
+    background: #f0b429;
     clip-path: polygon(50% 0, 59% 41%, 100% 50%, 59% 59%, 50% 100%, 41% 59%, 0 50%, 41% 41%);
+    animation: star-blink 4s ease-in-out infinite;
+}
+/* A quick bright flash every few seconds, rays stretching out and back. */
+@keyframes star-blink {
+    0%, 70%, 100% { scale: 1; rotate: 0deg; background: #f0b429; }
+    78% { scale: 1.5 1.7; rotate: 8deg; background: #fff3c4; }
+    86% { scale: 0.85; rotate: -4deg; background: #f0b429; }
+    92% { scale: 1.12; rotate: 0deg; }
 }
 .d-glow {
     --s: 56px;
@@ -243,18 +256,92 @@
     width: var(--s);
     height: var(--s);
     border-radius: 50%;
-    background: radial-gradient(closest-side, rgba(255, 220, 130, 0.5), transparent);
-    animation: shimmer 6s ease-in-out infinite alternate;
+    background: radial-gradient(closest-side, rgba(255, 196, 60, 0.6), transparent);
+    animation: glow-flash 4s ease-in-out infinite;
 }
-@keyframes shimmer { from { opacity: 0.35; scale: 0.85; } to { opacity: 1; scale: 1.1; } }
+@keyframes glow-flash { 0%, 70%, 100% { opacity: 0.45; scale: 0.9; } 78% { opacity: 1; scale: 1.35; } 90% { opacity: 0.6; scale: 1; } }
 .d-nativity {
     --h: 40px;
     top: 18px;
     width: calc(var(--h) * 2.22);
     height: var(--h);
-    background-image: url(decor/nativity.svg);
 }
-.d-tree { display: none; width: calc(var(--h) * 0.77); height: var(--h); background-image: url(decor/tree.svg); }
+.d-tree { display: none; width: calc(var(--h) * 0.77); height: var(--h); }
+
+/* The manger: the star's light falls on it, the baby's halo glows, Mary
+   bows now and then, Joseph shifts his staff, the sheep nibbles, and
+   sparkles rise from the hay. */
+.n-beam { animation: beam 4s ease-in-out infinite; }
+.n-glow { animation: breathe 5s ease-in-out infinite alternate; }
+.n-halo { animation: halo 3s ease-in-out infinite alternate; }
+.n-mary { animation: bow 11s ease-in-out infinite; }
+.n-staff { animation: staff 7s ease-in-out infinite; }
+.n-sheep { animation: nibble 6s ease-in-out infinite; }
+.n-spark { opacity: 0; animation: rise 4.5s ease-out infinite; }
+.n-spark:nth-of-type(2) { animation-delay: -1.5s; }
+.n-spark:nth-of-type(3) { animation-delay: -3s; }
+@keyframes beam { 0%, 70%, 100% { opacity: 0.45; } 80% { opacity: 1; } }
+@keyframes breathe { from { opacity: 0.6; scale: 0.92; } to { opacity: 1; scale: 1.06; } }
+@keyframes halo { from { opacity: 0.5; scale: 0.9; } to { opacity: 1; scale: 1.15; } }
+@keyframes bow { 0%, 60%, 100% { rotate: 0deg; } 70%, 82% { rotate: 9deg; } }
+@keyframes staff { 0%, 100% { rotate: -2deg; } 50% { rotate: 3deg; } }
+@keyframes nibble { 0%, 55%, 100% { translate: 0 0; } 62%, 78% { translate: -0.5px 3px; } 66%, 74% { translate: -0.5px 2px; } }
+@keyframes rise { 0% { opacity: 0; translate: 0 0; } 25% { opacity: 1; } 100% { opacity: 0; translate: 0 -16px; } }
+
+/* Trees sway, their lights twinkle, the top star glints and the presents
+   wiggle now and then. */
+.t-sway { animation: sway 6s ease-in-out infinite alternate; }
+.d-tree.r1 .t-sway, .d-tree.l2 .t-sway { animation-delay: -3s; }
+.t-l { animation: tree-light 2.2s ease-in-out infinite alternate; }
+.t-star { animation: glint 5s ease-in-out infinite; }
+.d-tree.r1 .t-star, .d-tree.l2 .t-star { animation-delay: -2.5s; }
+.t-gifts { animation: wiggle 9s ease-in-out infinite; }
+.d-tree.r1 .t-gifts { animation-delay: -4s; }
+.d-tree.l2 .t-gifts { animation-delay: -6s; }
+@keyframes sway { from { rotate: -1.6deg; } to { rotate: 1.6deg; } }
+@keyframes tree-light { from { opacity: 0.1; } to { opacity: 0.95; } }
+@keyframes glint { 0%, 80%, 100% { scale: 1; rotate: 0deg; } 88% { scale: 1.4; rotate: 20deg; } }
+@keyframes wiggle { 0%, 84%, 100% { rotate: 0deg; } 87% { rotate: -4deg; } 90% { rotate: 3deg; } 93% { rotate: -2deg; } }
+
+/* Santa flies over the planner every two and a half minutes, in a gentle
+   arc: about 20 seconds in view, galloping, waving, Rudolph's nose
+   blinking. Before his first pass (and with reduced motion) he waits
+   off-screen to the left. */
+.d-santa {
+    --sh: 76px;
+    top: 300px;
+    left: 0;
+    height: var(--sh);
+    width: calc(var(--sh) * 290 / 70);
+    translate: -105% 0;
+    animation: fly 150s linear 6s infinite;
+}
+@keyframes fly {
+    0% { translate: -105% 0; }
+    3.3% { translate: calc(25vw - 77.5%) -3.5vh; }
+    6.65% { translate: calc(50vw - 50%) -5vh; }
+    10% { translate: calc(75vw - 22.5%) -3.5vh; }
+    13.3% { translate: calc(100vw + 5%) 0; }
+    100% { translate: calc(100vw + 5%) 0; }
+}
+.s-ride { animation: ride 1.6s ease-in-out infinite alternate; }
+.s-legf, .s-legb { animation: gallop 0.5s ease-in-out infinite alternate; }
+.s-legb { animation-direction: alternate-reverse; }
+.s-legf.b, .s-legb.b { animation-delay: -0.25s; }
+.s-wave { animation: santa-wave 2.4s ease-in-out infinite; }
+.s-say { animation: say 5s ease-out infinite; }
+.s-say text { font-family: var(--font); }
+@keyframes say { 0%, 30% { opacity: 0; scale: 0.2; } 38% { opacity: 1; scale: 1.08; } 42%, 88% { opacity: 1; scale: 1; } 96%, 100% { opacity: 0; scale: 0.6; } }
+.s-nose, .s-glow { animation: nose 1.2s steps(1) infinite; }
+.s-sp { animation: trail 1.2s ease-out infinite; }
+.s-sp:nth-of-type(2) { animation-delay: -0.3s; }
+.s-sp:nth-of-type(3) { animation-delay: -0.6s; }
+.s-sp:nth-of-type(4) { animation-delay: -0.9s; }
+@keyframes ride { from { translate: 0 -2px; rotate: -1deg; } to { translate: 0 3px; rotate: 1.5deg; } }
+@keyframes gallop { from { rotate: -22deg; } to { rotate: 18deg; } }
+@keyframes santa-wave { 0%, 25%, 100% { rotate: 0deg; } 35%, 55%, 75% { rotate: -32deg; } 45%, 65% { rotate: 8deg; } }
+@keyframes nose { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+@keyframes trail { from { opacity: 1; scale: 1; } to { opacity: 0; scale: 0.3; } }
 /* The elves: one swings from the light string, one waves and one shows off
    a present. Only on large screens, where there's room above and below. */
 .decor svg { display: block; width: 100%; height: 100%; fill: none; stroke: none; overflow: visible; }
@@ -268,6 +355,11 @@
 .d-elf.gift .e-eyes { animation-delay: -2.5s; }
 .e-gift { animation: hop 3.6s ease-in-out infinite; }
 .e-kick { animation: kick 1.4s ease-in-out infinite alternate; }
+.e-head { animation: tilt 8s ease-in-out infinite; }
+.d-elf.gift .e-head { animation-delay: -4s; }
+.e-look { animation: look 6s ease-in-out infinite; }
+@keyframes tilt { 0%, 30%, 100% { rotate: 0deg; } 38%, 52% { rotate: -7deg; } 60%, 72% { rotate: 6deg; } }
+@keyframes look { 0%, 40%, 100% { translate: 0 0; } 48%, 66% { translate: 3.5px -1px; } }
 @keyframes swing { from { rotate: -9deg; } to { rotate: 9deg; } }
 @keyframes bob { from { translate: 0 0.25vh; } to { translate: 0 -0.2vh; } }
 @keyframes wave { 0%, 50%, 100% { rotate: 0deg; } 56%, 68%, 80% { rotate: -16deg; } 62%, 74% { rotate: 14deg; } }
@@ -290,6 +382,10 @@
     .d-elf.wave, .d-elf.gift { display: block; bottom: 0; height: min(62px, 17vw); width: calc(min(62px, 17vw) * 120 / 84); animation: none; }
     .d-elf.wave { left: calc(50% - min(100px, 27vw)); }
     .d-elf.gift { left: calc(50% + 8px); }
+    /* The page scrolls here, so Santa flies across the middle of the
+       screen, wherever it is (fixed needs a front layer without translate). */
+    [data-theme="christmas"] .decor.front { translate: none; }
+    .d-santa { position: fixed; top: 42vh; }
 }
 @media not all and (min-width: 900px) and (min-height: 560px) {
     @media (min-width: 380px) {
@@ -305,6 +401,7 @@
    1.6vh + 2.5rem + 0.6vh, then 0.8vh of padding). */
 @media (min-width: 900px) and (min-height: 560px) {
     .decor { --ground: calc(3vh + 2.5rem); }
+    .d-santa { --sh: 12vh; top: 52vh; }
     .d-nativity { --h: 4.4vh; }
     .d-star { --s: 2.3vh; top: calc(var(--ground) - 4.4vh * 0.87 - var(--s) * 0.85); }
     .d-glow { --s: 7vh; top: calc(var(--ground) - 4.4vh * 0.87 - 2.3vh * 0.35 - var(--s) / 2); }
@@ -353,27 +450,27 @@
     --t: 240px;
     --d: 30s;
     background-image:
-        radial-gradient(2.5px 2.5px at 20px 30px, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0)),
-        radial-gradient(2px 2px at 140px 70px, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0)),
-        radial-gradient(2px 2px at 90px 160px, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0)),
-        radial-gradient(2.5px 2.5px at 200px 200px, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0)),
-        radial-gradient(1.5px 1.5px at 60px 110px, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0)),
-        radial-gradient(2px 2px at 175px 125px, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0)),
-        radial-gradient(1.5px 1.5px at 220px 15px, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0)),
-        radial-gradient(2px 2px at 40px 215px, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0)),
-        radial-gradient(1.5px 1.5px at 115px 230px, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0));
+        radial-gradient(2.5px 2.5px at 20px 30px, #fff 35%, rgba(120, 150, 190, 0.5) 65%, rgba(120, 150, 190, 0)),
+        radial-gradient(2px 2px at 140px 70px, #fff 35%, rgba(120, 150, 190, 0.7) 65%, rgba(120, 150, 190, 0)),
+        radial-gradient(2px 2px at 90px 160px, #fff 35%, rgba(120, 150, 190, 0.75) 65%, rgba(120, 150, 190, 0)),
+        radial-gradient(2.5px 2.5px at 200px 200px, #fff 35%, rgba(120, 150, 190, 0.7) 65%, rgba(120, 150, 190, 0)),
+        radial-gradient(1.5px 1.5px at 60px 110px, #fff 35%, rgba(120, 150, 190, 0.7) 65%, rgba(120, 150, 190, 0)),
+        radial-gradient(2px 2px at 175px 125px, #fff 35%, rgba(120, 150, 190, 0.65) 65%, rgba(120, 150, 190, 0)),
+        radial-gradient(1.5px 1.5px at 220px 15px, #fff 35%, rgba(120, 150, 190, 0.7) 65%, rgba(120, 150, 190, 0)),
+        radial-gradient(2px 2px at 40px 215px, #fff 35%, rgba(120, 150, 190, 0.65) 65%, rgba(120, 150, 190, 0)),
+        radial-gradient(1.5px 1.5px at 115px 230px, #fff 35%, rgba(120, 150, 190, 0.6) 65%, rgba(120, 150, 190, 0));
 }
 .d-snow::after {
     --t: 360px;
     --d: 60s;
     opacity: 0.75;
     background-image:
-        radial-gradient(4px 4px at 60px 100px, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0)),
-        radial-gradient(3.5px 3.5px at 250px 40px, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0)),
-        radial-gradient(4px 4px at 310px 260px, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0)),
-        radial-gradient(3px 3px at 150px 320px, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0)),
-        radial-gradient(3.5px 3.5px at 20px 300px, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0)),
-        radial-gradient(3px 3px at 190px 180px, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+        radial-gradient(4px 4px at 60px 100px, #fff 35%, rgba(120, 150, 190, 0.7) 65%, rgba(120, 150, 190, 0)),
+        radial-gradient(3.5px 3.5px at 250px 40px, #fff 35%, rgba(120, 150, 190, 0.6) 65%, rgba(120, 150, 190, 0)),
+        radial-gradient(4px 4px at 310px 260px, #fff 35%, rgba(120, 150, 190, 0.6) 65%, rgba(120, 150, 190, 0)),
+        radial-gradient(3px 3px at 150px 320px, #fff 35%, rgba(120, 150, 190, 0.6) 65%, rgba(120, 150, 190, 0)),
+        radial-gradient(3.5px 3.5px at 20px 300px, #fff 35%, rgba(120, 150, 190, 0.55) 65%, rgba(120, 150, 190, 0)),
+        radial-gradient(3px 3px at 190px 180px, #fff 35%, rgba(120, 150, 190, 0.55) 65%, rgba(120, 150, 190, 0));
 }
 /* Snow on the ground along the bottom (the end of the page on phones). */
 .d-bank {

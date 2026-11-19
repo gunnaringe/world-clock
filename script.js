@@ -747,7 +747,7 @@ function takeHash() {
 // (loaded offline), reload anyway to get off the cached copy.
 
 const APP_FILES = ['./', 'styles.css', 'i18n.js', 'common.js', 'theme.js', 'script.js',
-    'decor/nativity.svg', 'decor/tree.svg', 'decor/lights.svg', 'decor/snow-edge.svg', 'decor/snowbank.svg'];
+    'decor/lights.svg', 'decor/snow-edge.svg', 'decor/snowbank.svg'];
 let baseline;
 let nextCheck = nextFourAm(new Date());
 
@@ -848,3 +848,8 @@ takeHash();
 addEventListener('pageshow', (e) => { if (e.persisted) renderAll(); });
 addEventListener('storage', renderAll);
 addEventListener('hashchange', takeHash);
+
+// Christmas theme: one tree drawing (a <template> in index.html), copied into
+// each spot so its lights, star and presents can move.
+const treeTpl = document.getElementById('tree-tpl');
+if (treeTpl) for (const el of document.querySelectorAll('.d-tree')) el.append(treeTpl.content.cloneNode(true));

@@ -19,10 +19,14 @@ self-hosted VT323 in `fonts/` for the hacker theme — SIL OFL, keep
   variables. The fill-the-screen layout is the `min-width: 900px and
   min-height: 560px` media block; `fitTable()` shrinks table text if 24 rows
   still don't fit.
-- `decor/` — SVG drawings for the Christmas theme. Only `index.html` has the
-  `.decor` layers (back: behind everything; front: just the elves under the
-  table), so settings gets the colours only. Animations move or fade, never
-  repaint (wall screens), and drift with screen protection.
+- Christmas theme (light): the drawings that move (Santa, manger, elves, and
+  a tree `<template>` that `script.js` copies into each `.d-tree`) are inline
+  SVG in `index.html`, animated from `styles.css`; `decor/` holds the static
+  tiles (lights, snow). Only `index.html` has the `.decor` layers (back:
+  behind everything; front: the elves), so settings gets the colours only.
+  Animate with transform/opacity only (wall screens), and SVG parts inside a
+  `transform="translate(...)"` group take `transform-origin` in that group's
+  own coordinates.
 - `sw.js`, `manifest.webmanifest`, `icons/` — offline/PWA.
 
 ## Deploy
