@@ -1205,6 +1205,7 @@ body.idle .selbar { opacity: 0; }
 .hour-select option { background: var(--bg); color: var(--text); }
 .chip.accent { color: var(--accent); border-color: var(--accent-soft); background: var(--accent-soft); }
 .row.flat { border-top: 0; padding: 0; }
+.install-how { margin: 12px 0 0; }
 .btn.danger { color: var(--danger); }
 .btn.danger:hover { border-color: var(--danger); }
 .legend-range { color: var(--faint); font-variant-numeric: tabular-nums; }

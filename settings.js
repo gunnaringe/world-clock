@@ -401,6 +401,40 @@ shareBtn.addEventListener('click', async () => {
     }
 });
 
+// ---------- Install as app ----------
+
+// Chrome and Edge offer their own install dialog (beforeinstallprompt);
+// Safari and the rest only install from their menus, so the button shows
+// how instead. Hidden when already running as an installed app.
+const installCard = document.getElementById('install-card');
+const installHow = document.getElementById('install-how');
+let installPrompt = null;
+const installed = () => navigator.standalone === true
+    || matchMedia('(display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui)').matches;
+installCard.hidden = installed();
+addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    installPrompt = e;
+    installCard.hidden = false;
+    installHow.hidden = true;
+});
+addEventListener('appinstalled', () => { installPrompt = null; installCard.hidden = true; });
+document.getElementById('install').addEventListener('click', async () => {
+    if (installPrompt) {
+        const p = installPrompt;
+        installPrompt = null;
+        await p.prompt();
+        return;
+    }
+    const ua = navigator.userAgent;
+    const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    const macSafari = !ios && /Macintosh/.test(ua) && /Safari\//.test(ua) && !/Chrome|Chromium|Edg|Firefox/.test(ua);
+    // data-i18n so a language change re-translates it.
+    installHow.dataset.i18n = ios ? 'installIos' : macSafari ? 'installMac' : 'installOther';
+    installHow.textContent = t(installHow.dataset.i18n);
+    installHow.hidden = false;
+});
+
 document.getElementById('reset').addEventListener('click', () => {
     if (!confirm(t('resetConfirm'))) return;
     resetSettings();
