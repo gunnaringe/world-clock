@@ -87,8 +87,10 @@ meaning of existing ones. The clock page opens a link once (`takeHash` →
 `openSetup`) and strips the fragment: a link matching a preset puts that one in
 use; a new one becomes a temp preset with a banner in the top bar (Keep / Back
 to …), unless it's for a wall screen (signage in the link or on the device),
-where it's kept straight away. Only a link with signage on applies the
-device keys (theme, language, screen settings). `a=` carries the preset name.
+where it's kept straight away. A link opened on a device never set up
+(`NEW_DEVICE`) is applied in full as its only preset, as before presets
+(kiosks loading a link on every start). Otherwise only a link with signage on
+applies the device keys (theme, language, screen settings). `a=` carries the preset name.
 
 Shared times (`encodeTime()` / `decodeTime()`: `w=` start in minutes since
 epoch, `n=` hours, `m=` sender's places) are a separate link kind under the

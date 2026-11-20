@@ -496,6 +496,11 @@ function presetName(p) {
     return n;
 }
 
+// A device that has never been set up (read before anything writes presets).
+// A link opened there is applied in full and kept, as before presets: that's
+// how a kiosk that loads a link on every start was set up.
+let NEW_DEVICE = localStorage.getItem('presets') === null && localStorage.getItem('locations') === null;
+
 const newPresetId = () => 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const cleanName = (n) => String(n ?? '').trim().slice(0, 40);
 
@@ -621,10 +626,11 @@ function presetSig(values) {
 // preset to look at, keep or leave, unless it's for a wall screen (signage
 // in the link or on the device): nobody is there to choose, and the screen
 // loads the same link on every start, so it's kept straight away. Only a
-// link that turns signage on sets up the device's look and screen settings.
+// link that turns signage on, or one opened on a new device (NEW_DEVICE),
+// sets up the device's look and screen settings.
 // Returns 'same', 'switched', 'shared' (temp) or 'kept'.
 function openSetup(values, name) {
-    const screen = values.signage === 'true';
+    const screen = values.signage === 'true' || NEW_DEVICE;
     if (screen) {
         const device = {};
         for (const k of DEVICE_KEYS) device[k] = values[k];
@@ -640,8 +646,16 @@ function openSetup(values, name) {
         usePreset(s, match.id);
         return 'switched';
     }
-    const temp = !screen && !getToggle('signage');
     const cur = activePreset(s);
+    // A new device: the link becomes its one preset instead of a second one.
+    if (NEW_DEVICE && !cur.temp) {
+        cur.values = part;
+        if (cleanName(name)) cur.name = cleanName(name);
+        usePreset(s, cur.id);
+        NEW_DEVICE = false;
+        return 'kept';
+    }
+    const temp = !screen && !getToggle('signage');
     const p = { id: newPresetId(), name: cleanName(name) || t('sharedSetup'), values: part, shared: true };
     if (temp) p.temp = true;
     s.list.push(p);
