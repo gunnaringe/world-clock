@@ -12,7 +12,20 @@ const ICONS = {
     grip: '<circle cx="9" cy="6" r="1.3"/><circle cx="15" cy="6" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="18" r="1.3"/><circle cx="15" cy="18" r="1.3"/>',
     remove: '<path d="M6 6l12 12M18 6L6 18"/>',
     hours: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    use: '<circle cx="12" cy="12" r="8"/>',
+    inUse: '<circle cx="12" cy="12" r="8"/><path d="M8.5 12.2l2.4 2.4 4.6-4.8"/>',
+    undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+    keep: '<path d="M5 12.5l4.5 4.5L19 7"/>',
 };
+
+// A small button or chip with an icon before its text (preset rows).
+function labelled(tag, className, icon, text) {
+    const e = el(tag, className);
+    if (tag === 'button') e.type = 'button';
+    e.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[icon]}</svg>`;
+    e.append(el('span', null, text));
+    return e;
+}
 
 function el(tag, className, text) {
     const e = document.createElement(tag);
@@ -450,9 +463,11 @@ function renderPresets() {
         name.addEventListener('keydown', (e) => { if (e.key === 'Enter') name.blur(); });
         const actions = el('span', 'preset-actions');
         if (p.id === s.id && changed) {
-            actions.append(el('span', 'chip changed', t('presetChanged')));
-            const undo = el('button', 'btn small ghost', t('undoChanges'));
-            undo.type = 'button';
+            // The second half is left out on narrow rows (styles.css).
+            const chip = el('span', 'chip changed', t('presetChangedShort'));
+            chip.append(el('span', 'more', t('presetChangedMore')));
+            actions.append(chip);
+            const undo = labelled('button', 'btn small ghost', 'undo', t('undoChanges'));
             undo.dataset.action = 'undo-changes';
             undo.addEventListener('click', () => {
                 const values = {};
@@ -464,15 +479,13 @@ function renderPresets() {
         }
         if (p.temp) {
             actions.append(el('span', 'chip', t('presetNotKept')));
-            const keep = el('button', 'btn small', t('keep'));
-            keep.type = 'button';
+            const keep = labelled('button', 'btn small', 'keep', t('keep'));
             keep.addEventListener('click', () => { keepShared(); renderPresets(); });
             actions.append(keep);
         } else if (p.id === s.id) {
-            if (!changed) actions.append(el('span', 'chip accent', t('presetInUse')));
+            if (!changed) actions.append(labelled('span', 'chip accent', 'inUse', t('presetInUse')));
         } else {
-            const use = el('button', 'btn small ghost', t('presetUse'));
-            use.type = 'button';
+            const use = labelled('button', 'btn small ghost', 'use', t('presetUse'));
             use.addEventListener('click', () => { switchPreset(p.id); presetChanged(); });
             actions.append(use);
         }
