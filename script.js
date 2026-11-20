@@ -165,19 +165,37 @@ function renderPlanner(start) {
 // In the fill-the-screen layout, shrink the table text until all 24 rows fit
 // (short laptop screens, or many places with the clocks in two rows).
 const fillScreen = matchMedia('(min-width: 900px) and (min-height: 560px)');
+// Shrinks the table text until the 24 rows fit, but not below MIN_TD_PX:
+// on low screens the table then scrolls inside its card (headings stay, the
+// current hour is the top row) rather than getting unreadable. The page
+// itself never scrolls in the fill-the-screen layout.
+const MIN_TD_PX = 13;
 function fitTable() {
     const box = bodyEl.closest('.table-scroll');
     const table = bodyEl.closest('table');
     table.style.removeProperty('--td-font');
+    box.classList.remove('scrolls');
     if (!fillScreen.matches) return;
     let px = parseFloat(getComputedStyle(bodyEl.querySelector('td') || table).fontSize);
-    while (box.scrollHeight > box.clientHeight + 1 && px > 9) {
-        px -= 0.5;
+    const over = () => box.scrollHeight > box.clientHeight + 1;
+    while (over() && px > MIN_TD_PX) {
+        px = Math.max(MIN_TD_PX, px - 0.5);
         table.style.setProperty('--td-font', px + 'px');
     }
+    if (over()) box.classList.add('scrolls');
 }
 let resizeTimer;
 addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(fitTable, 100); });
+// A scrolled table goes back to the current hour after a minute left alone,
+// so a wall screen someone scrolled doesn't hide "now" for good.
+let scrollBackTimer;
+bodyEl.closest('.table-scroll').addEventListener('scroll', (e) => {
+    clearTimeout(scrollBackTimer);
+    if (e.currentTarget.scrollTop > 0) {
+        const box = e.currentTarget;
+        scrollBackTimer = setTimeout(() => box.scrollTo({ top: 0, behavior: 'smooth' }), 60e3);
+    }
+}, { passive: true });
 
 function startOfLocalHour(now) {
     const w = wall(LOCAL, now);
@@ -432,10 +450,15 @@ function holdTrack() {
 }
 function holdScroll() {
     if (!hold || !hold.active) return;
-    const edge = 70;
-    const dy = hold.py < edge ? -(edge - hold.py) / 4 : hold.py > innerHeight - edge ? (hold.py - innerHeight + edge) / 4 : 0;
+    // Near the edges of the window, or of the table when it scrolls by itself.
+    const box = bodyEl.closest('.table-scroll');
+    const own = box.classList.contains('scrolls');
+    const r = own ? box.getBoundingClientRect() : { top: 0, bottom: innerHeight };
+    const edge = own ? Math.min(70, r.height / 4) : 70;
+    const top = r.top + edge, bottom = r.bottom - edge;
+    const dy = hold.py < top ? -(top - hold.py) / 4 : hold.py > bottom ? (hold.py - bottom) / 4 : 0;
     if (dy) {
-        scrollBy(0, dy);
+        (own ? box : window).scrollBy(0, dy);
         holdTrack();
     }
     hold.raf = requestAnimationFrame(holdScroll);
