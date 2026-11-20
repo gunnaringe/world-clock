@@ -26,7 +26,10 @@ and evening, and night. Made for office wall screens as much as for phones.
   the cursor; optional burn-in protection (a slow pixel drift, and dimming
   outside working hours).
   Unattended screens pick up new versions by themselves overnight.
+- 🗂️ **Presets** — keep a setup per team or use, and switch from the top bar.
 - 🔗 **Share setup** — one link sets up another screen or device the same way.
+  Opening someone's link shows their setup without losing yours: keep it as a
+  preset, or go back.
 - ⚙️ Themes (auto, light, dark, hacker, Christmas — a light, snowy theme with a
   living nativity scene, Santa's sleigh, trees, elves and falling snow), 12/24-hour, optional seconds,
   English or Norwegian, show your own time zone, hide the big clocks.

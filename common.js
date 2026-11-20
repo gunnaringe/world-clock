@@ -261,6 +261,7 @@ function getTheme() { const v = localStorage.getItem('theme'); return THEMES.inc
 
 const SETTINGS_KEYS = ['locations', 'hourFormat', 'screenFlash', 'protection', 'showLocal', 'showClocks',
     'seconds', 'signage', 'dim', 'theme', 'lang', 'hours'];
+// Also stored, and kept by a reset: presets, activePreset, presetBack (see Presets).
 function resetSettings() { for (const k of SETTINGS_KEYS) localStorage.removeItem(k); }
 
 // ---------- Share links ----------
@@ -289,6 +290,12 @@ function resetSettings() { for (const k of SETTINGS_KEYS) localStorage.removeIte
 //                 b=flash reads as gentle)
 //   l=no          language, always written: "auto" is resolved to what the
 //                 sender sees, so the setup looks the same everywhere.
+//   a=Team+Asia   the name of the sender's preset; left out for the default
+//                 names. The recipient's preset gets it.
+//
+// The recipient opens a link as a preset (see openSetup): t=, l=, b= and the
+// screen letters k and d of o= are the device's, applied only by a link that
+// turns signage on (setting up a wall screen).
 //
 // Links use only letters, digits and `-_~+%&=/` (and `.` inside zones):
 // chat apps decide where a pasted link ends and many stop at `,` or `:` or
@@ -362,6 +369,8 @@ function encodeSetup() {
     if (getTheme() !== 'auto') parts.push('t=' + getTheme());
     if (getProtection() !== 'none') parts.push('b=' + getProtection());
     parts.push('l=' + currentLang());
+    const name = activePreset().name;
+    if (!DEFAULT_PRESET_NAMES.includes(name)) parts.push('a=' + encName(name));
     return parts.join('&');
 }
 
@@ -403,6 +412,12 @@ function decodeSetup(hash) {
         }
     }
     return isSetup ? out : null; // not one of our links without p=
+}
+
+// The preset name a setup link carries (a=), or ''.
+function decodeSetupName(hash) {
+    const part = hash.split('&').find((x) => x.startsWith('a='));
+    return part ? cleanName(decName(part.slice(2))) : '';
 }
 
 // Shared times: a moment or a block of hours picked in the table, sent to
@@ -449,6 +464,190 @@ function writeSettings(values) {
         else localStorage.setItem(k, values[k]);
     }
     return before;
+}
+
+// ---------- Presets ----------
+//
+// A preset is a named copy of the settings that say what to show
+// (PRESET_KEYS: places, hours, clock options), so one device can keep a setup
+// per team and open a shared link without losing its own. The look and the
+// wall-screen settings (DEVICE_KEYS) belong to the device, not to a preset.
+//
+// The preset in use lives in the plain keys, so everything else reads them
+// as before. `presets` is [{ id, name, values, shared?, temp? }] (values as
+// raw localStorage strings) and `activePreset` the id in use; that preset's
+// `values` are refreshed from the plain keys whenever presets are read, so
+// they're never stale. A `temp` preset is a shared setup opened from a link
+// and not kept yet: it's dropped when you switch away, and `presetBack` is
+// the id to go back to. A first visit, or a device from before presets, gets
+// one preset named "My setup" holding what it had.
+
+const PRESET_KEYS = ['locations', 'hours', 'hourFormat', 'showLocal', 'showClocks', 'seconds'];
+const DEVICE_KEYS = SETTINGS_KEYS.filter((k) => !PRESET_KEYS.includes(k));
+// Default names, in every language: shown in the current language and never
+// sent in links.
+const MY_SETUP_NAMES = Object.values(I18N).map((s) => s.mySetup);
+const SHARED_SETUP_NAMES = Object.values(I18N).map((s) => s.sharedSetup);
+const DEFAULT_PRESET_NAMES = [...MY_SETUP_NAMES, ...SHARED_SETUP_NAMES];
+function presetName(p) {
+    const n = cleanName(p.name);
+    if (MY_SETUP_NAMES.includes(n) || (!n && !p.shared)) return t('mySetup');
+    if (SHARED_SETUP_NAMES.includes(n) || !n) return t('sharedSetup');
+    return n;
+}
+
+const newPresetId = () => 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const cleanName = (n) => String(n ?? '').trim().slice(0, 40);
+
+function liveValues() {
+    const v = {};
+    for (const k of PRESET_KEYS) v[k] = localStorage.getItem(k);
+    return v;
+}
+
+// { list, id }: every preset, and the id of the one in use.
+function getPresets() {
+    let list = readJSON('presets', null);
+    list = (Array.isArray(list) ? list : []).filter((p) => p && typeof p.id === 'string'
+        && p.values && typeof p.values === 'object');
+    let id = localStorage.getItem('activePreset');
+    const fresh = !list.length;
+    if (fresh) list = [{ id: newPresetId(), name: t('mySetup'), values: {} }];
+    if (!list.some((p) => p.id === id)) id = list[0].id;
+    for (const p of list) p.name = presetName(p);
+    list.find((p) => p.id === id).values = liveValues();
+    if (fresh) savePresets({ list, id });
+    return { list, id };
+}
+
+function savePresets({ list, id }) {
+    localStorage.setItem('presets', JSON.stringify(list));
+    localStorage.setItem('activePreset', id);
+}
+
+const activePreset = (s = getPresets()) => s.list.find((p) => p.id === s.id);
+
+// Puts preset `id` in use: its values go to the plain keys, and a temp
+// preset that isn't the one chosen is dropped.
+function usePreset(s, id) {
+    s.list = s.list.filter((p) => !p.temp || p.id === id);
+    const p = s.list.find((x) => x.id === id);
+    const values = {};
+    for (const k of PRESET_KEYS) values[k] = p.values[k] ?? null;
+    writeSettings(values);
+    s.id = id;
+    if (!p.temp) localStorage.removeItem('presetBack');
+    savePresets(s);
+    return p;
+}
+
+function switchPreset(id) {
+    const s = getPresets();
+    if (s.list.some((p) => p.id === id) && id !== s.id) usePreset(s, id);
+}
+
+// A copy of the preset in use, put in use under a new name.
+function duplicatePreset() {
+    const s = getPresets();
+    let n = s.list.length + 1;
+    const taken = new Set(s.list.map((p) => p.name));
+    while (taken.has(t('presetN', { n }))) n++;
+    const p = { id: newPresetId(), name: t('presetN', { n }), values: { ...activePreset(s).values } };
+    s.list.push(p);
+    usePreset(s, p.id);
+    return p;
+}
+
+function renamePreset(id, name) {
+    const s = getPresets();
+    const p = s.list.find((x) => x.id === id);
+    if (p && cleanName(name)) { p.name = cleanName(name); savePresets(s); }
+}
+
+// The last preset can't be deleted; deleting the one in use moves to another.
+function deletePreset(id) {
+    const s = getPresets();
+    if (s.list.length < 2) return;
+    if (id === s.id) usePreset(s, s.list.find((p) => p.id !== id && !p.temp).id);
+    s.list = s.list.filter((p) => p.id !== id);
+    savePresets(s);
+}
+
+// Keeps the shared setup that's being looked at as a preset of its own.
+function keepShared() {
+    const s = getPresets();
+    const p = activePreset(s);
+    if (!p.temp) return;
+    delete p.temp;
+    localStorage.removeItem('presetBack');
+    savePresets(s);
+}
+
+// Leaves the shared setup for the preset that was in use before it.
+function backFromShared() {
+    const s = getPresets();
+    const back = s.list.find((p) => p.id === localStorage.getItem('presetBack') && !p.temp)
+        || s.list.find((p) => !p.temp);
+    if (back) usePreset(s, back.id);
+    else { delete activePreset(s).temp; savePresets(s); }
+}
+
+// The preset that "Back" goes to while a shared setup is being looked at.
+function presetBackName(s = getPresets()) {
+    const back = s.list.find((p) => p.id === localStorage.getItem('presetBack') && !p.temp)
+        || s.list.find((p) => !p.temp);
+    return back ? back.name : '';
+}
+
+// What a preset shows, independent of how it's stored, so a link can be
+// matched against the presets already there.
+function presetSig(values) {
+    const json = (k) => { try { return JSON.parse(values[k]); } catch { return null; } };
+    const toggle = (k) => { const v = json(k); return typeof v === 'boolean' ? v : TOGGLES[k]; };
+    const locs = Array.isArray(json('locations')) ? json('locations') : defaultLocations();
+    return JSON.stringify([
+        locs.filter((l) => l && canon(l.timeZone)).map((l) => {
+            const h = normHours(l.hours);
+            return [canon(l.timeZone), String(l.name || '').trim() || cityOf(l.timeZone), h && encHours(h)];
+        }),
+        encHours(normHours(json('hours')) || DEFAULT_HOURS),
+        values.hourFormat === '12',
+        toggle('showLocal'), toggle('showClocks'), toggle('seconds'),
+    ]);
+}
+
+// Opens a setup link (decodeSetup's values, and the name from a=).
+// A preset showing the same is put in use. Otherwise the link becomes a temp
+// preset to look at, keep or leave, unless it's for a wall screen (signage
+// in the link or on the device): nobody is there to choose, and the screen
+// loads the same link on every start, so it's kept straight away. Only a
+// link that turns signage on sets up the device's look and screen settings.
+// Returns 'same', 'switched', 'shared' (temp) or 'kept'.
+function openSetup(values, name) {
+    const screen = values.signage === 'true';
+    if (screen) {
+        const device = {};
+        for (const k of DEVICE_KEYS) device[k] = values[k];
+        writeSettings(device);
+    }
+    const part = {};
+    for (const k of PRESET_KEYS) part[k] = values[k];
+    const s = getPresets();
+    const sig = presetSig(part);
+    const match = s.list.find((p) => presetSig(p.values) === sig);
+    if (match) {
+        if (match.id === s.id) return 'same';
+        usePreset(s, match.id);
+        return 'switched';
+    }
+    const temp = !screen && !getToggle('signage');
+    const cur = activePreset(s);
+    const p = { id: newPresetId(), name: cleanName(name) || t('sharedSetup'), values: part, shared: true };
+    if (temp) p.temp = true;
+    s.list.push(p);
+    if (temp && !cur.temp) localStorage.setItem('presetBack', cur.id);
+    usePreset(s, p.id);
+    return temp ? 'shared' : 'kept';
 }
 
 // ---------- Offline ----------

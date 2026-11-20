@@ -57,7 +57,19 @@ in `TOGGLES`), `protection` (`none`/`gentle`; the retired `flash` and the old
 `screenFlash: true` read as `gentle`), `theme` (`auto`/`light`/`dark`/`hacker`/`christmas`),
 `lang` (`auto`/`en`/`no`), `hours` (`DEFAULT_HOURS` shape). Every key must be listed in `SETTINGS_KEYS`
 (reset, share-link import and undo rely on it). Render user text with
-`textContent` — names can come from share links.
+`textContent` — names (places and presets) can come from share links.
+
+Presets (`common.js`, "Presets"): `PRESET_KEYS` (places, hours, hour format,
+showLocal, showClocks, seconds) belong to a preset; the rest (`DEVICE_KEYS`:
+theme, lang, signage, protection, dim) to the device. The preset in use stays
+in the plain keys above, so nothing else needs to know about presets;
+`presets` (`[{ id, name, values, shared?, temp? }]`), `activePreset` and
+`presetBack` are stored beside them, and `getPresets()` refreshes the active
+preset's `values` from the plain keys on every read. Existing devices get one
+"My setup" preset on first load. Default names (`mySetup`, `sharedSetup`) are
+shown in the current language and never put in links. A new key belongs in
+`SETTINGS_KEYS` and, if it says what to show rather than how this screen
+behaves, in `PRESET_KEYS` too.
 
 First visit (no `locations` key): your own city, New York, Berlin, Kolkata
 (`defaultLocations()`, skipping duplicates of your zone); "show your time
@@ -71,8 +83,12 @@ original colouring exactly.
 
 `encodeSetup()` / `decodeSetup()` in `common.js`; the format is documented
 above them. Links are a **public contract**: only add keys, never change the
-meaning of existing ones. The clock page applies a link once (`takeHash`),
-strips the fragment and offers undo.
+meaning of existing ones. The clock page opens a link once (`takeHash` →
+`openSetup`) and strips the fragment: a link matching a preset puts that one in
+use; a new one becomes a temp preset with a banner in the top bar (Keep / Back
+to …), unless it's for a wall screen (signage in the link or on the device),
+where it's kept straight away. Only a link with signage on applies the
+device keys (theme, language, screen settings). `a=` carries the preset name.
 
 Shared times (`encodeTime()` / `decodeTime()`: `w=` start in minutes since
 epoch, `n=` hours, `m=` sender's places) are a separate link kind under the

@@ -673,6 +673,7 @@ function renderAll() {
     seconds = getToggle('seconds');
     hours = getHours();
     renderLegend();
+    renderPresets();
     emptyEl.hidden = locations.length > 0;
     plannerEl.hidden = locations.length === 0;
     clocksEl.hidden = !getToggle('showClocks');
@@ -701,20 +702,61 @@ function takeHash() {
         if (!fillScreen.matches) sharedEl.scrollIntoView({ block: 'start' });
         return;
     }
-    const values = decodeSetup(location.hash.slice(1));
+    const hash = location.hash.slice(1);
+    const values = decodeSetup(hash);
     history.replaceState(null, '', location.href.split('#')[0]);
     if (!values) return;
-    // Signage loads the same link on every start, so say nothing when it
-    // changes nothing; and a signage screen has nobody to press Undo.
-    const changed = Object.keys(values).some((k) => values[k] !== localStorage.getItem(k));
-    const before = writeSettings(values);
+    const result = openSetup(values, decodeSetupName(hash));
     applyTheme();
     renderAll();
-    if (!changed || getToggle('signage')) return;
-    showToast(t('imported'), {
-        label: t('undo'),
-        run: () => { writeSettings(before); applyTheme(); renderAll(); },
-    }, 10000);
+    // A shared setup that's new shows the banner (renderPresets); one you
+    // already have is just put in use. Signage screens load the same link on
+    // every start, and nobody reads a toast there.
+    if (result === 'switched' && !getToggle('signage')) {
+        showToast(t('switchedTo', { name: activePreset().name }));
+    }
+}
+
+// ---------- Presets ----------
+//
+// A menu in the top bar when there's more than one, and a banner while a
+// shared setup from a link is being looked at.
+
+const presetSelect = document.getElementById('preset-select');
+const setupBanner = document.getElementById('setup-banner');
+presetSelect.addEventListener('change', () => {
+    switchPreset(presetSelect.value);
+    renderAll();
+});
+document.getElementById('setup-keep').addEventListener('click', () => {
+    keepShared();
+    renderAll();
+    showToast(t('presetKept', { name: activePreset().name }));
+});
+document.getElementById('setup-back').addEventListener('click', () => {
+    backFromShared();
+    renderAll();
+});
+
+function renderPresets() {
+    const s = getPresets();
+    const cur = activePreset(s);
+    const temp = !!cur.temp;
+    setupBanner.hidden = !temp;
+    presetSelect.hidden = temp || s.list.length < 2;
+    if (temp) {
+        const named = cur.name !== t('sharedSetup');
+        document.getElementById('setup-name').textContent = named ? cur.name : '';
+        document.getElementById('setup-back').textContent = t('backTo', { name: presetBackName(s) });
+    } else {
+        presetSelect.replaceChildren(...s.list.map((p) => {
+            const o = document.createElement('option');
+            o.value = p.id;
+            o.textContent = p.name;
+            return o;
+        }));
+        presetSelect.value = s.id;
+    }
 }
 
 // ---------- Updates for screens that are never reloaded ----------
