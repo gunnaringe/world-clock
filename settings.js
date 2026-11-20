@@ -401,6 +401,67 @@ shareBtn.addEventListener('click', async () => {
     }
 });
 
+// ---------- Presets ----------
+
+const presetsEl = document.getElementById('presets');
+
+// After the preset in use changes, everything on the page shows the new one.
+function presetChanged() {
+    places = getLocations();
+    openHours.clear();
+    renderAll();
+}
+
+function renderPresets() {
+    const s = getPresets();
+    presetsEl.replaceChildren(...s.list.map((p) => {
+        const li = el('li', 'preset' + (p.id === s.id ? ' current' : ''));
+        li.dataset.id = p.id;
+        const name = el('input', 'place-name');
+        name.value = p.name;
+        name.maxLength = 40;
+        name.setAttribute('aria-label', t('presetName'));
+        name.addEventListener('change', () => {
+            renamePreset(p.id, name.value);
+            renderPresets();
+        });
+        name.addEventListener('keydown', (e) => { if (e.key === 'Enter') name.blur(); });
+        const actions = el('span', 'preset-actions');
+        if (p.temp) {
+            actions.append(el('span', 'chip', t('presetNotKept')));
+            const keep = el('button', 'btn small', t('keep'));
+            keep.type = 'button';
+            keep.addEventListener('click', () => { keepShared(); renderPresets(); });
+            actions.append(keep);
+        } else if (p.id === s.id) {
+            actions.append(el('span', 'chip accent', t('presetInUse')));
+        } else {
+            const use = el('button', 'btn small ghost', t('presetUse'));
+            use.type = 'button';
+            use.addEventListener('click', () => { switchPreset(p.id); presetChanged(); });
+            actions.append(use);
+        }
+        if (s.list.length > 1) {
+            actions.append(iconButton('remove', t('presetDelete'), () => {
+                if (!confirm(t('presetDeleteConfirm', { name: p.name }))) return;
+                deletePreset(p.id);
+                presetChanged();
+            }));
+        }
+        li.append(name, actions);
+        return li;
+    }));
+}
+
+document.getElementById('preset-new').addEventListener('click', () => {
+    const p = duplicatePreset();
+    presetChanged();
+    // Straight to naming it.
+    const input = presetsEl.querySelector(`[data-id="${p.id}"] .place-name`);
+    input.focus();
+    input.select();
+});
+
 // ---------- Install as app ----------
 
 // Chrome and Edge offer their own install dialog (beforeinstallprompt);
@@ -445,6 +506,7 @@ document.getElementById('reset').addEventListener('click', () => {
 
 function renderAll() {
     applyI18n();
+    renderPresets();
     renderFormat();
     renderTheme();
     renderLang();
