@@ -1128,8 +1128,11 @@ body.idle .selbar { opacity: 0; }
     background: var(--card-strong);
 }
 .preset.current { border-color: var(--accent-soft); }
-.preset > .place-name { flex: 1; min-width: 0; margin-left: -6px; }
-.preset-actions { display: flex; align-items: center; gap: 6px; flex: none; }
+.preset { flex-wrap: wrap; }
+/* The name keeps room for itself; on narrow rows the buttons go below it. */
+.preset > .place-name { flex: 1 1 9rem; min-width: 0; margin-left: -6px; }
+.preset-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.chip.changed { color: var(--edge, var(--text)); border-color: currentColor; background: transparent; }
 .place {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
