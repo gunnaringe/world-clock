@@ -1388,6 +1388,10 @@ body.dimmed .dim { opacity: 0.6; }
     .planner-head h2 { font-size: 1.05rem; }
     .legend { font-size: 0.85rem; }
     .table-scroll { flex: 1; min-height: 0; overflow: hidden; }
+    /* Too low for 24 readable rows (fitTable): scroll inside the card, with
+       the headings over the rows looking like the card behind them. */
+    .table-scroll.scrolls { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+    .table-scroll.scrolls th { z-index: 1; background: linear-gradient(var(--card), var(--card)), var(--bg); }
     table { height: 100%; border-spacing: 0.3vw 0.25vh; }
     th { padding: 0 0.5vw 0.6vh; font-size: 1rem; }
     .th-off { font-size: 0.75rem; }
@@ -1404,6 +1408,16 @@ body.dimmed .dim { opacity: 0.6; }
     .clocks.with-seconds[data-count] .clock-time { font-size: min(calc((100vw - 4.8vw) / var(--cols, 4) / 4.7), 9vh); }
     .clock { gap: 0; padding: 1.6vh 1.4vw; }
     .clock-time { margin: 0.4vh 0 0.2vh; }
+}
+
+/* Low screens (wide but short): smaller clocks still, so more of the table fits. */
+@media (min-width: 900px) and (min-height: 560px) and (max-height: 760px) {
+    .clocks .clock-time,
+    .clocks[data-count] .clock-time { font-size: min(calc((100vw - 4.8vw) / var(--cols, 4) / 3.7), 7vh); }
+    .clocks.with-seconds[data-count] .clock-time { font-size: min(calc((100vw - 4.8vw) / var(--cols, 4) / 4.7), 7vh); }
+    .clock { padding: 1.2vh 1.4vw; }
+    .clock-time { margin: 0.2vh 0 0; }
+    .wrap { gap: 1.4vh; }
 }
 
 @media (max-width: 560px) {
