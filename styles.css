@@ -1351,6 +1351,14 @@ body.dimmed .dim { opacity: 0.6; }
     .topbar { padding: 1.6vh 2.4vw 0.6vh; }
     .icon-btn { width: 2.5rem; height: 2.5rem; }
     .icon-btn svg { width: 1.25rem; height: 1.25rem; }
+    /* The preset menu grows with the buttons beside it. */
+    .preset-select {
+        height: 2.5rem;
+        padding: 0 1.75rem 0 0.75rem;
+        border-radius: 0.75rem;
+        background-position: right 0.5rem center;
+        background-size: 0.875rem;
+    }
 
     .wrap {
         flex: 1;
