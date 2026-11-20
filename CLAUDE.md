@@ -67,7 +67,10 @@ in the plain keys above, so nothing else needs to know about presets;
 `presetBack` are stored beside them, and `getPresets()` refreshes the active
 preset's `values` from the plain keys on every read. Existing devices get one
 "My setup" preset on first load. Default names (`mySetup`, `sharedSetup`) are
-shown in the current language and never put in links. A new key belongs in
+shown in the current language and never put in links. Changes save to the
+preset in use at once; the settings page remembers where you started (`start`
+in `settings.js`) to show "Changed", offer Undo changes, and make "Save as
+new" move the changes to the new preset and put the old one back. A new key belongs in
 `SETTINGS_KEYS` and, if it says what to show rather than how this screen
 behaves, in `PRESET_KEYS` too.
 

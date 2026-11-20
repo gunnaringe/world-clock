@@ -402,11 +402,26 @@ shareBtn.addEventListener('click', async () => {
 });
 
 // ---------- Presets ----------
+//
+// Changes are saved to the preset in use straight away. So that's visible,
+// the page remembers how the preset looked when you started (page opened, or
+// a switch here): once it differs, its row says so and offers Undo changes,
+// and "Save as new" moves the changes to the new preset, putting the one you
+// started from back as it was. Only PRESET_KEYS count (presetSig).
 
 const presetsEl = document.getElementById('presets');
+const presetNewBtn = document.getElementById('preset-new');
+let start;      // { id, values } of the preset in use when you started
+let shownChanged = null;
+
+function markStart() {
+    start = { id: getPresets().id, values: liveValues() };
+}
+const hasChanges = () => start.id === getPresets().id && presetSig(start.values) !== presetSig(liveValues());
 
 // After the preset in use changes, everything on the page shows the new one.
-function presetChanged() {
+function presetChanged(keepStart = false) {
+    if (!keepStart) markStart();
     places = getLocations();
     openHours.clear();
     renderAll();
@@ -414,6 +429,11 @@ function presetChanged() {
 
 function renderPresets() {
     const s = getPresets();
+    const changed = hasChanges();
+    shownChanged = changed;
+    // data-i18n so a language change re-translates it.
+    presetNewBtn.dataset.i18n = changed ? 'presetSaveNewChanged' : 'presetSaveNew';
+    presetNewBtn.textContent = t(presetNewBtn.dataset.i18n);
     presetsEl.replaceChildren(...s.list.map((p) => {
         const li = el('li', 'preset' + (p.id === s.id ? ' current' : ''));
         li.dataset.id = p.id;
@@ -421,12 +441,27 @@ function renderPresets() {
         name.value = p.name;
         name.maxLength = 40;
         name.setAttribute('aria-label', t('presetName'));
+        // Only this field is updated: redrawing the list here would swallow
+        // the click that blurred it.
         name.addEventListener('change', () => {
             renamePreset(p.id, name.value);
-            renderPresets();
+            name.value = getPresets().list.find((x) => x.id === p.id)?.name ?? name.value;
         });
         name.addEventListener('keydown', (e) => { if (e.key === 'Enter') name.blur(); });
         const actions = el('span', 'preset-actions');
+        if (p.id === s.id && changed) {
+            actions.append(el('span', 'chip changed', t('presetChanged')));
+            const undo = el('button', 'btn small ghost', t('undoChanges'));
+            undo.type = 'button';
+            undo.dataset.action = 'undo-changes';
+            undo.addEventListener('click', () => {
+                const values = {};
+                for (const k of PRESET_KEYS) values[k] = start.values[k];
+                writeSettings(values);
+                presetChanged(true);
+            });
+            actions.append(undo);
+        }
         if (p.temp) {
             actions.append(el('span', 'chip', t('presetNotKept')));
             const keep = el('button', 'btn small', t('keep'));
@@ -434,7 +469,7 @@ function renderPresets() {
             keep.addEventListener('click', () => { keepShared(); renderPresets(); });
             actions.append(keep);
         } else if (p.id === s.id) {
-            actions.append(el('span', 'chip accent', t('presetInUse')));
+            if (!changed) actions.append(el('span', 'chip accent', t('presetInUse')));
         } else {
             const use = el('button', 'btn small ghost', t('presetUse'));
             use.type = 'button';
@@ -453,9 +488,40 @@ function renderPresets() {
     }));
 }
 
-document.getElementById('preset-new').addEventListener('click', () => {
+// Every edit on the page goes through one of these; re-render the card only
+// when "changed" flips, so typing elsewhere keeps its focus.
+for (const ev of ['change', 'input', 'click', 'pointerup', 'keyup']) {
+    document.addEventListener(ev, () => setTimeout(() => {
+        if (start && hasChanges() !== shownChanged) renderPresets();
+    }), true);
+}
+
+presetNewBtn.addEventListener('click', () => {
+    const fromId = start.id;
+    const before = start.values;
+    const changes = hasChanges() ? liveValues() : null;
     const p = duplicatePreset();
+    // The changes go with the new preset; the one you started from is put
+    // back as it was (if it's still there: a shared setup not kept is dropped).
+    const s = getPresets();
+    const from = changes && s.list.find((x) => x.id === fromId);
+    if (from) {
+        from.values = { ...before };
+        savePresets(s);
+    }
     presetChanged();
+    if (from) {
+        showToast(t('savedAsNew', { name: p.name, from: from.name }), {
+            label: t('undo'),
+            run: () => {
+                switchPreset(fromId);
+                deletePreset(p.id);
+                writeSettings(changes);
+                start = { id: fromId, values: before };
+                presetChanged(true);
+            },
+        }, 10000);
+    }
     // Straight to naming it.
     const input = presetsEl.querySelector(`[data-id="${p.id}"] .place-name`);
     input.focus();
@@ -505,6 +571,7 @@ document.getElementById('reset').addEventListener('click', () => {
 // ---------- Start ----------
 
 function renderAll() {
+    if (!start) markStart();
     applyI18n();
     renderPresets();
     renderFormat();
