@@ -1304,7 +1304,9 @@ body.idle .selbar { opacity: 0; }
 
 /* Presets: a menu when there's more than one, and a banner while a shared
    setup is being looked at (both on the clock page). */
-.preset-select { min-width: 0; max-width: 14rem; height: 40px; border-radius: 12px; text-overflow: ellipsis; }
+/* Height from its text (plus padding), never less than the buttons beside it,
+   so a big font can't cut the text off. */
+.preset-select { min-width: 0; max-width: 14rem; min-height: 40px; line-height: 1.25; border-radius: 12px; text-overflow: ellipsis; }
 .setup-banner {
     display: flex;
     align-items: center;
@@ -1351,6 +1353,14 @@ body.dimmed .dim { opacity: 0.6; }
     .topbar { padding: 1.6vh 2.4vw 0.6vh; }
     .icon-btn { width: 2.5rem; height: 2.5rem; }
     .icon-btn svg { width: 1.25rem; height: 1.25rem; }
+    /* The preset menu grows with the buttons beside it. */
+    .preset-select {
+        min-height: 2.5rem;
+        padding: 0.25rem 1.75rem 0.25rem 0.75rem;
+        border-radius: 0.75rem;
+        background-position: right 0.5rem center;
+        background-size: 0.875rem;
+    }
 
     .wrap {
         flex: 1;
